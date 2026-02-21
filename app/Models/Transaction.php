@@ -64,7 +64,7 @@ class Transaction extends Model
                 $this->goal->decrement('balance', $this->amount * $factor);
             } elseif ($this->type === static::INCOME) {
                 $this->goal->increment('balance', $this->amount * $factor);
-            } elseif ($this->type === static::TRANSFER) {
+            } elseif ($this->type === static::TRANSFER || $this->type === static::GOAL) {
                 $this->goal->increment('balance', $this->amount * $factor);
             }
         }

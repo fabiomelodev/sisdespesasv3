@@ -7,7 +7,9 @@ use App\Filament\Resources\Goals\Pages\EditGoal;
 use App\Filament\Resources\Goals\Pages\ListGoals;
 use App\Filament\Resources\Goals\Schemas\GoalForm;
 use App\Filament\Resources\Goals\Tables\GoalsTable;
+use App\Filament\Resources\Invoices\RelationManagers\TransactionsRelationManager;
 use App\Models\Goal;
+use App\Models\Transaction;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -42,7 +44,7 @@ class GoalResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TransactionsRelationManager::class
         ];
     }
 

@@ -3,7 +3,7 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
-use App\Filament\Widgets\{ControlFinancialStatsOverview, InvoicesTableWidget, RecurringTransactionsTableWidget, ReservationsTableWidget, TotalTransactionsExpenseByCategoriesTableWidget, TransactionsChartBarYearWidget, TransactionsChartWidget};
+use App\Filament\Widgets\{ControlFinancialStatsOverview, GoalsTableWidget, InvoicesTableWidget, RecurringTransactionsTableWidget, TotalTransactionsExpenseByCategoriesTableWidget, TransactionsChartBarYearWidget, TransactionsChartWidget};
 use Illuminate\Contracts\Support\Htmlable;
 
 class Dashboard extends BaseDashboard
@@ -25,7 +25,7 @@ class Dashboard extends BaseDashboard
         return [
             ControlFinancialStatsOverview::class,
             TransactionsChartBarYearWidget::class,
-            ReservationsTableWidget::class,
+            GoalsTableWidget::class,
             RecurringTransactionsTableWidget::class,
             InvoicesTableWidget::class,
             TotalTransactionsExpenseByCategoriesTableWidget::class,

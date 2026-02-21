@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Invoices\RelationManagers;
 
 use App\Filament\Resources\Transactions\TransactionResource;
+use App\Helpers\FormatCurrency;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
@@ -27,7 +28,8 @@ class TransactionsRelationManager extends RelationManager
                     ->label('Data da Transação')
                     ->date('d/m/Y'),
                 TextColumn::make('amount')
-                    ->label('Valor'),
+                    ->label('Valor')
+                    ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
                 IconColumn::make('is_paid')
                     ->label('Pago')
                     ->boolean()
