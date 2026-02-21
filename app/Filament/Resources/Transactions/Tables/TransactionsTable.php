@@ -34,13 +34,11 @@ class TransactionsTable
                     ->formatStateUsing(fn(string $state): string => match ($state) {
                         Transaction::EXPENSE => 'Despesa',
                         Transaction::INCOME => 'Renda',
-                        Transaction::RESERVE => 'Reserva',
                         Transaction::TRANSFER => 'Transferência',
                     })
                     ->color(fn(string $state): string => match ($state) {
                         Transaction::EXPENSE => 'danger',
                         Transaction::INCOME => 'success',
-                        Transaction::RESERVE => 'info',
                         Transaction::TRANSFER => 'warning',
                     }),
                 TextColumn::make('category.name')
@@ -87,7 +85,6 @@ class TransactionsTable
                     ->options([
                         Transaction::INCOME => 'Renda',
                         Transaction::EXPENSE => 'Despesa',
-                        Transaction::RESERVE => 'Reserva',
                         Transaction::TRANSFER => 'Transferência'
                     ]),
                 SelectFilter::make('account_id')

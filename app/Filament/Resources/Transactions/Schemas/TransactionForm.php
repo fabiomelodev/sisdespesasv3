@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Schemas;
 
+use App\Models\Transaction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -71,35 +72,36 @@ class TransactionForm
                                     ->options([
                                         'expense' => 'Despesa',
                                         'income' => 'Renda',
-                                        'reserve' => 'Reserva',
                                         'transfer' => 'Transferência',
                                     ]),
-                                Select::make(name: 'reservation_id')
-                                    ->label('Caixinha')
-                                    ->relationship('reservation', 'name')
-                                    ->placeholder('Opcional')
-                                    ->visible(fn(Get $get): bool => $get('type') === 'reserve')
+                                Select::make('goal_id')
+                                    ->label('Meta')
+                                    ->relationship('goal', 'name')
+                                    ->visible(fn(Get $get): bool => $get('type') === Transaction::TRANSFER)
                                     ->required(),
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
                                     ->relationship('account', 'name')
                                     ->required(),
+                                Select::make('goal_id')
+                                    ->label('Meta')
+                                    ->relationship('goal', 'name')
+                                    ->visible(fn(Get $get) => $get('type') === Transaction::TRANSFER),
                                 Select::make('destination_account_id')
                                     ->label('Conta Destino')
                                     ->relationship('destinationAccount', 'name')
-                                    ->visible(fn(Get $get) => $get('type') === 'transfer')
-                                    ->required(fn(Get $get) => $get('type') === 'transfer'),
+                                    ->visible(fn(Get $get) => $get('type') === Transaction::TRANSFER),
+                                // ->required(fn(Get $get) => $get('type') === Transaction::TRANSFER),
                                 Select::make('category_id')
                                     ->label('Categoria')
                                     ->relationship('category', 'name', fn(Builder $query, Get $get): Builder => $query->where('type', $get('type')))
                                     ->hidden(fn(Get $get): bool => match ($get('type')) {
-                                        'expense' => false,
-                                        'income' => false,
-                                        'reserve' => true,
-                                        'transfer' => true,
+                                        Transaction::EXPENSE => false,
+                                        Transaction::INCOME => false,
+                                        Transaction::TRANSFER => true,
                                         default => false
                                     })
-                                    ->required(fn(Get $get) => $get('type') !== 'transfer'),
+                                    ->required(fn(Get $get) => $get('type') !== Transaction::TRANSFER),
                                 Toggle::make('is_paid')
                                     ->label('Pago')
                                     ->inline(false)
