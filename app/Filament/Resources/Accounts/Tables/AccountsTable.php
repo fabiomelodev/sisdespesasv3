@@ -31,6 +31,9 @@ class AccountsTable
                 TextColumn::make('initial_balance')
                     ->label('Saldo Inicial')
                     ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
+                TextColumn::make('balance')
+                    ->label('Saldo Atual')
+                    ->formatStateUsing(callback: fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
                 IconColumn::make('status'),
                 TextColumn::make('created_at')
                     ->label('Criado Em')
