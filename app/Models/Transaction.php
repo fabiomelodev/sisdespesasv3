@@ -46,21 +46,17 @@ class Transaction extends Model
 
     public function adjustBalances(bool $isIncrementing)
     {
+        // Se isIncrementing é false, multiplicamos por -1 para fazer o inverso
         $factor = $isIncrementing ? 1 : -1;
 
-        if ($this->type === static::EXPENSE) {
+        if ($this->type === 'expense') {
             $this->account->decrement('balance', $this->amount * $factor);
-        } elseif ($this->type === static::INCOME) {
+        } elseif ($this->type === 'revenue') {
             $this->account->increment('balance', $this->amount * $factor);
-        } elseif ($this->type === static::TRANSFER) {
+        } elseif ($this->type === 'transfer') {
+            // Sai da origem (-), entra no destino (+)
             $this->account->decrement('balance', $this->amount * $factor);
             $this->destinationAccount->increment('balance', $this->amount * $factor);
-        } elseif ($this->type === static::RESERVE) {
-            $this->account->decrement('balance', $this->amount * $factor);
-        }
-
-        if ($this->reservation_id) {
-            $this->reservation()->increment('current_amount', $this->amount * $factor);
         }
     }
 
