@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->enum('type', ['income', 'expense', 'goal', 'transfer'])->change();
+            $table->enum('type', ['income', 'expense', 'goal', 'reserve', 'transfer'])->change();
         });
     }
 
