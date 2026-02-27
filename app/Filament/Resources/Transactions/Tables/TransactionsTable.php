@@ -34,11 +34,13 @@ class TransactionsTable
                     ->formatStateUsing(fn(string $state): string => match ($state) {
                         Transaction::EXPENSE => 'Despesa',
                         Transaction::INCOME => 'Renda',
+                        Transaction::GOAL => 'Meta',
                         Transaction::TRANSFER => 'Transferência',
                     })
                     ->color(fn(string $state): string => match ($state) {
                         Transaction::EXPENSE => 'danger',
                         Transaction::INCOME => 'success',
+                        Transaction::GOAL => 'warning',
                         Transaction::TRANSFER => 'warning',
                     }),
                 TextColumn::make('category.name')
