@@ -44,18 +44,26 @@ class TransactionGroupForm
                                 DatePicker::make('purchase_date')
                                     ->label('Data da Compra')
                                     ->required(),
+                                Select::make('payment_method')
+                                    ->label('Meio de Pagamento')
+                                    ->required()
+                                    ->live()
+                                    ->options([
+                                        'debit' => 'Débito',
+                                        'credit' => 'Crédito',
+                                        'pix' => 'Pix'
+                                    ]),
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
                                     ->relationship('account', 'name')
                                     ->required(),
                                 Select::make('category_id')
                                     ->label('Categoria')
-                                    ->relationship('category', 'name', fn(Builder $query): Builder => $query->expense())
+                                    ->relationship('category', 'name', fn(Builder $query): Builder => $query->isExpense())
                                     ->required(),
                                 Select::make('credit_card_id')
                                     ->label('Cartão de Crédito')
                                     ->relationship('creditCard', 'name')
-                                    ->required()
                             ]),
                         Section::make()
                             ->hidden(fn(?Model $record) => $record === null)

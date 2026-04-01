@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
 use App\Filament\Widgets\{ControlFinancialStatsOverview, GoalsTableWidget, InvoicesTableWidget, RecurringTransactionsTableWidget, TotalTransactionsExpenseByCategoriesTableWidget, TransactionsChartBarYearWidget, TransactionsChartWidget};
+use App\Livewire\CategoryExpenseAnalysisTable;
 use Illuminate\Contracts\Support\Htmlable;
 
 class Dashboard extends BaseDashboard
@@ -29,6 +30,7 @@ class Dashboard extends BaseDashboard
             RecurringTransactionsTableWidget::class,
             InvoicesTableWidget::class,
             TotalTransactionsExpenseByCategoriesTableWidget::class,
+            CategoryExpenseAnalysisTable::class,
             TransactionsChartWidget::class,
         ];
     }
