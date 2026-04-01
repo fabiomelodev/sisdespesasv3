@@ -11,17 +11,17 @@ class TransactionStats extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        $expensesMonthCurrentSum = Transaction::typeExpense()->monthCurrent()->sum('amount');
+        $expensesMonthCurrentSum = Transaction::isExpense()->monthCurrent()->sum('amount');
 
-        $expensesSum = Transaction::isPaid()->typeExpense()->sum('amount');
+        $expensesSum = Transaction::isPaid()->isExpense()->sum('amount');
 
-        $incomesMonthCurrentSum = Transaction::typeIncome()->monthCurrent()->sum('amount');
+        $incomesMonthCurrentSum = Transaction::isIncome()->monthCurrent()->sum('amount');
 
-        $incomesSum = Transaction::isPaid()->typeIncome()->sum('amount');
+        $incomesSum = Transaction::isPaid()->isIncome()->sum('amount');
 
-        $transfersMonthCurrentSum = Transaction::typeTransfer()->monthCurrent()->sum('amount');
+        $transfersMonthCurrentSum = Transaction::isTransfer()->monthCurrent()->sum('amount');
 
-        $transfersSum = Transaction::isPaid()->typeTransfer()->sum('amount');
+        $transfersSum = Transaction::isPaid()->isTransfer()->sum('amount');
 
         return [
             Stat::make('Entradas', FormatCurrency::getFormatCurrency($incomesMonthCurrentSum))

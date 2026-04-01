@@ -36,7 +36,7 @@ class RecurringTransactionsTableWidget extends TableWidget
                             ->whereYear('transaction_date', $currentMonth->year);
                     });
             })
-            ->typeExpense()
+            ->isExpense()
             ->with('recurringTransaction')
             ->whereHas('recurringTransaction', function (Builder $query) {
                 $query->where('is_active', 1);
@@ -57,7 +57,7 @@ class RecurringTransactionsTableWidget extends TableWidget
                             ->whereYear('transaction_date', $currentMonth->year);
                     });
             })
-            ->typeExpense()
+            ->isExpense()
             ->with('recurringTransaction')
             ->whereHas('recurringTransaction', function (Builder $query) {
                 $query->where('is_active', 1);
@@ -79,7 +79,7 @@ class RecurringTransactionsTableWidget extends TableWidget
                             ->whereYear('transaction_date', $currentMonth->year);
                     });
             })
-            ->typeExpense()
+            ->isExpense()
             ->with('recurringTransaction')
             ->whereHas('recurringTransaction', function (Builder $query) {
                 $query->where('is_active', 1);

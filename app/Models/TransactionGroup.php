@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,13 +27,13 @@ class TransactionGroup extends Model
                     'name' => $model->name . ' ' . $i . '/' . $model->installments,
                     'type' => 'expense',
                     'amount' => $transactionAmount,
-                    'payment_method' => 'credit',
+                    'payment_method' => $model->payment_method,
                     'installment_number' => $i,
                     'transaction_date' => $model->purchase_date->copy()->addMonthsNoOverflow($i),
                     'is_paid' => false,
                     'account_id' => $model->account_id,
                     'category_id' => $model->category_id,
-                    'credit_card_id' => $model->credit_card_id,
+                    'credit_card_id' => $model?->credit_card_id,
                     'transaction_group_id' => $model->id,
                 ]);
             }

@@ -37,10 +37,9 @@ class ListTransactions extends ListRecords
     {
         return [
             null => Tab::make('Todos'),
-            'income' => Tab::make('Rendas')->icon(Heroicon::OutlinedArrowTrendingUp)->query(fn($query) => $query->typeIncome()),
-            'expense' => Tab::make('Despesas')->icon(Heroicon::OutlinedArrowTrendingDown)->query(fn($query) => $query->typeExpense()),
-            'transfer' => Tab::make('Transferências')->icon(Heroicon::OutlinedArrowTrendingUp)->query(fn($query) => $query->typeTransfer()),
-            'reserve' => Tab::make('Reservas')->icon(Heroicon::OutlinedArrowTrendingUp)->query(fn($query) => $query->typeReserve()),
+            'income' => Tab::make('Rendas')->icon(Heroicon::OutlinedArrowTrendingUp)->query(fn($query) => $query->isIncome()),
+            'expense' => Tab::make('Despesas')->icon(Heroicon::OutlinedArrowTrendingDown)->query(fn($query) => $query->isExpense()),
+            'transfer' => Tab::make('Transferências')->icon(Heroicon::OutlinedArrowTrendingUp)->query(fn($query) => $query->isTransfer()),
         ];
     }
 }

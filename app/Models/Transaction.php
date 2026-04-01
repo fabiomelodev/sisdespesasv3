@@ -19,7 +19,7 @@ class Transaction extends Model
 
     public const INCOME = 'income';
 
-    public const RESERVE = 'reserve';
+    public const GOAL = 'goal';
 
     public const TRANSFER = 'transfer';
 
@@ -46,26 +46,36 @@ class Transaction extends Model
 
     public function adjustBalances(bool $isIncrementing)
     {
-        // Se isIncrementing é false, multiplicamos por -1 para fazer o inverso
         $factor = $isIncrementing ? 1 : -1;
 
-        if ($this->type === 'expense') {
-            $this->account->decrement('balance', $this->amount * $factor);
-        } elseif ($this->type === 'revenue') {
-            $this->account->increment('balance', $this->amount * $factor);
-        } elseif ($this->type === 'transfer') {
-            // Sai da origem (-), entra no destino (+)
-            $this->account->decrement('balance', $this->amount * $factor);
-            $this->destinationAccount->increment('balance', $this->amount * $factor);
+        if ($this->destination_account_id) {
+            if ($this->type === static::EXPENSE) {
+                $this->account->decrement('balance', $this->amount * $factor);
+            } elseif ($this->type === static::INCOME) {
+                $this->account->increment('balance', $this->amount * $factor);
+            } elseif ($this->type === static::TRANSFER) {
+                $this->account->decrement('balance', $this->amount * $factor);
+                $this->destinationAccount->increment('balance', $this->amount * $factor);
+            }
+        }
+
+        if ($this->goal_id) {
+            if ($this->type === static::EXPENSE) {
+                $this->goal->decrement('balance', $this->amount * $factor);
+            } elseif ($this->type === static::INCOME) {
+                $this->goal->increment('balance', $this->amount * $factor);
+            } elseif ($this->type === static::TRANSFER || $this->type === static::GOAL) {
+                $this->goal->increment('balance', $this->amount * $factor);
+            }
         }
     }
 
-    public function scopeTypeExpense(Builder $query): Builder
+    public function scopeIsExpense(Builder $query): Builder
     {
         return $query->where('type', static::EXPENSE);
     }
 
-    public function scopeTypeIncome(Builder $query): Builder
+    public function scopeIsIncome(Builder $query): Builder
     {
         return $query->where('type', static::INCOME);
     }
@@ -80,14 +90,14 @@ class Transaction extends Model
         return $query->whereMonth('transaction_date', now()->month)->whereYear('transaction_date', now()->year);
     }
 
-    public function scopeTypeTransfer(Builder $query): Builder
+    public function scopeIsTransfer(Builder $query): Builder
     {
         return $query->where('type', static::TRANSFER);
     }
 
-    public function scopeTypeReserve(Builder $query): Builder
+    public function scopeIsGoal(Builder $query): Builder
     {
-        return $query->where('type', static::RESERVE);
+        return $query->where('type', static::GOAL);
     }
 
     public function account(): BelongsTo
@@ -108,6 +118,11 @@ class Transaction extends Model
     public function destinationAccount(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'destination_account_id');
+    }
+
+    public function goal(): BelongsTo
+    {
+        return $this->belongsTo(Goal::class);
     }
 
     public function invoice(): BelongsTo

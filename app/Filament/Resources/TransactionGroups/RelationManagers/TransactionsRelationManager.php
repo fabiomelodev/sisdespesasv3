@@ -22,6 +22,9 @@ class TransactionsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make(),
             ])
+            ->filters([
+                //
+            ])
             ->defaultSort('installment_number', 'asc')
             ->columns([
                 TextColumn::make('name')

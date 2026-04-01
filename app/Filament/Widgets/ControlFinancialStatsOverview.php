@@ -14,7 +14,7 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        $incomesPaidMonthCurrentSum = Transaction::query()->monthCurrent()->typeIncome()->isPaid()->sum('amount');
+        $incomesPaidMonthCurrentSum = Transaction::query()->monthCurrent()->isIncome()->isPaid()->sum('amount');
 
         $invoicesMonthCurrentSum = Invoice::orderBy('due_date', 'asc')
             ->monthCurrent()
@@ -31,7 +31,7 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
 
         $expensesPaidMonthCurrentSum = Transaction::query()
             ->monthCurrent()
-            ->typeExpense()
+            ->isExpense()
             ->whereIn('payment_method', ['debit', 'pix'])
             ->whereNull('recurring_transaction_id')
             ->isPaid()
@@ -41,7 +41,7 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
 
         $recurringTransactionsMonthCurrentSum = Transaction::query()
             ->monthCurrent()
-            ->typeExpense()
+            ->isExpense()
             ->with('recurringTransaction')
             ->orderBy('is_paid', 'desc')
             ->whereHas('recurringTransaction', function (Builder $query) {

@@ -25,9 +25,9 @@ class Category extends Model
     {
         return Attribute::make(
             get: function (): float|int {
-                $expensesByCategorySum = $this->transactions()->monthCurrent()->isPaid()->typeExpense()->sum('amount');
+                $expensesByCategorySum = $this->transactions()->monthCurrent()->isPaid()->isExpense()->sum('amount');
 
-                $incomesSum = Transaction::monthCurrent()->isPaid()->typeIncome()->sum('amount');
+                $incomesSum = Transaction::monthCurrent()->isPaid()->isIncome()->sum('amount');
 
                 $result = ($expensesByCategorySum / $incomesSum) * 100;
 

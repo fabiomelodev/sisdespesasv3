@@ -3,34 +3,29 @@
 namespace App\Filament\Widgets;
 
 use App\Helpers\FormatCurrency;
-use App\Models\Reservation;
+use App\Models\Goal;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Size;
 use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\Layout\Grid;
-use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Tapp\FilamentProgressBarColumn\Tables\Columns\ProgressBarColumn;
 
-class ReservationsTableWidget extends TableWidget
+class GoalsTableWidget extends TableWidget
 {
     protected int|string|array $columnSpan = 1;
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn(): Builder => Reservation::query()->isActive()->limit(4))
-            ->heading('Caixinhas')
+            ->query(fn(): Builder => Goal::query()->isProgress()->limit(4))
+            ->heading('Metas')
             ->paginated(false)
             ->headerActions(
                 [
@@ -46,7 +41,7 @@ class ReservationsTableWidget extends TableWidget
                     ->weight(FontWeight::Bold),
                 Grid::make(2)
                     ->schema([
-                        TextColumn::make('current_amount')
+                        TextColumn::make('balance')
                             ->formatStateUsing(fn($state) => FormatCurrency::getFormatCurrency($state)),
                         Stack::make([
                             TextColumn::make('target_amount')
