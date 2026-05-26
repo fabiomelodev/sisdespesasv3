@@ -12,9 +12,4 @@ class ImmediateExpense extends Model
     protected $casts = [
         'pay_day' => 'datetime'
     ];
-
-    public function bank(): BelongsTo
-    {
-        return $this->belongsTo(Bank::class);
-    }
 }

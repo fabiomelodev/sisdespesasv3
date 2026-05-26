@@ -18,7 +18,7 @@ class TransactionsRelationManager extends RelationManager
     {
         return $table
             ->heading('Transações')
-            ->defaultSort('installment_number', 'asc')
+            ->defaultSort('transaction_date', 'desc')
             ->paginated(false)
             ->columns([
                 TextColumn::make('name')

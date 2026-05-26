@@ -29,7 +29,7 @@ class TransactionGroup extends Model
                     'amount' => $transactionAmount,
                     'payment_method' => $model->payment_method,
                     'installment_number' => $i,
-                    'transaction_date' => $model->purchase_date->copy()->addMonthsNoOverflow($i),
+                    'transaction_date' => $model->purchase_date->copy()->addMonthsNoOverflow($i - 1),
                     'is_paid' => false,
                     'account_id' => $model->account_id,
                     'category_id' => $model->category_id,

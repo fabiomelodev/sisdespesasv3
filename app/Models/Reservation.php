@@ -44,19 +44,6 @@ class Reservation extends Model
         return $query->where('is_active', 1);
     }
 
-    // protected function currentAmount(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: function (): int|string {
-    //             if ($this->reservationTransactions()) {
-    //                 return $this->reservationTransactions()->isPaid()->sum('amount');
-    //             }
-
-    //             return 0;
-    //         }
-    //     );
-    // }
-
     protected function percentage(): Attribute
     {
         return Attribute::make(

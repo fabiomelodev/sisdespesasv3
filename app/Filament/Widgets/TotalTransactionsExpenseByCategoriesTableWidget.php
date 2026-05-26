@@ -11,36 +11,52 @@ use Filament\Tables\Columns\Layout\Grid;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget;
-use Illuminate\Database\Eloquent\Builder;
 
 class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
 {
+    use InteractsWithPageFilters;
+
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
-        $query = Category::orderBy('name', 'asc')
+        // 1. Captura as datas dos filtros globais
+        $startDate = $this->pageFilters['startDate'] ?? null;
+        $endDate = $this->pageFilters['endDate'] ?? null;
+
+        // 2. Construção da Query
+        $query = Category::query()
+            ->orderBy('name', 'asc')
             ->select('categories.*')
-            ->selectSub(function ($query) {
+            ->selectSub(function ($query) use ($startDate, $endDate) {
                 $query->from('transactions')
-                    ->selectRaw('COALESCE(SUM(amount),0)')
+                    ->selectRaw('COALESCE(SUM(amount), 0)')
                     ->whereColumn('transactions.category_id', 'categories.id')
-                    ->where('is_paid', 1)
+                    // ->where('is_paid', 1)
                     ->where('type', 'expense')
-                    ->whereMonth('transaction_date', now()->month)
-                    ->whereYear('transaction_date', now()->year);
+                    // Aplicando o filtro dinâmico dentro da subquery
+                    ->when($startDate, fn($q) => $q->whereDate('transaction_date', '>=', $startDate))
+                    ->when($endDate, fn($q) => $q->whereDate('transaction_date', '<=', $endDate))
+                    // Fallback para o mês atual caso os filtros estejam vazios
+                    ->when(!$startDate && !$endDate, function ($q) {
+                        $q->whereMonth('transaction_date', now()->month)
+                            ->whereYear('transaction_date', now()->year);
+                    });
             }, 'totalExpenses')
             ->having('totalExpenses', '>', 0);
 
-        $valueTotal = FormatCurrency::getFormatCurrency($query->get()->sum('totalExpenses'));
-
+        // 3. Cálculo do Total Geral e Porcentagem
+        $categoriesData = $query->get();
+        $grandTotal = $categoriesData->sum('totalExpenses');
+        $valueTotalFormatted = FormatCurrency::getFormatCurrency($grandTotal);
 
         return $table
-            ->query(fn(): Builder => $query)
+            ->query(fn() => $query)
             ->heading('Despesas por Categorias')
+            ->description('Total: ' . $valueTotalFormatted)
             ->searchable(false)
-            ->description('Total: ' . ($valueTotal))
             ->paginated(false)
             ->columns([
                 Grid::make(2)
@@ -55,7 +71,12 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
                         ]),
                         Stack::make([
                             TextColumn::make('percentage')
-                                ->grow(false)
+                                ->state(function ($record) use ($grandTotal) {
+                                    // Cálculo dinâmico da porcentagem baseada no total filtrado
+                                    if ($grandTotal <= 0)
+                                        return 0;
+                                    return ($record->totalExpenses / $grandTotal) * 100;
+                                })
                                 ->formatStateUsing(fn($state): string => number_format($state, 0, ',', '.') . '%')
                                 ->size(TextSize::Large)
                                 ->weight(FontWeight::Bold)

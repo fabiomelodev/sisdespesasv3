@@ -35,13 +35,11 @@ class TransactionsTable
                         Transaction::EXPENSE => 'Despesa',
                         Transaction::INCOME => 'Renda',
                         Transaction::GOAL => 'Meta',
-                        Transaction::TRANSFER => 'Transferência',
                     })
                     ->color(fn(string $state): string => match ($state) {
                         Transaction::EXPENSE => 'danger',
                         Transaction::INCOME => 'success',
                         Transaction::GOAL => 'warning',
-                        Transaction::TRANSFER => 'warning',
                     }),
                 TextColumn::make('category.name')
                     ->label('Categoria'),
@@ -87,7 +85,6 @@ class TransactionsTable
                     ->options([
                         Transaction::INCOME => 'Renda',
                         Transaction::EXPENSE => 'Despesa',
-                        Transaction::TRANSFER => 'Transferência'
                     ]),
                 SelectFilter::make('account_id')
                     ->label('Conta Bancária')
