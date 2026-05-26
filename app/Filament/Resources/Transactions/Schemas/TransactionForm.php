@@ -73,7 +73,6 @@ class TransactionForm
                                         Transaction::EXPENSE => 'Despesa',
                                         Transaction::INCOME => 'Renda',
                                         Transaction::GOAL => 'Meta',
-                                        Transaction::TRANSFER => 'Transferência',
                                     ]),
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
@@ -84,11 +83,6 @@ class TransactionForm
                                     ->relationship('goal', 'name')
                                     ->visible(fn(Get $get) => $get('type') === Transaction::GOAL)
                                     ->required(),
-                                Select::make('destination_account_id')
-                                    ->label('Conta Destino')
-                                    ->relationship('destinationAccount', 'name')
-                                    ->visible(fn(Get $get) => $get('type') === Transaction::TRANSFER)
-                                    ->required(),
                                 Select::make('category_id')
                                     ->label('Categoria')
                                     ->relationship('category', 'name', fn(Builder $query, Get $get): Builder => $query->where('type', $get('type')))
@@ -96,7 +90,6 @@ class TransactionForm
                                         Transaction::EXPENSE => true,
                                         Transaction::INCOME => true,
                                         Transaction::GOAL => false,
-                                        Transaction::TRANSFER => false,
                                         default => true
                                     })
                                     ->required(),

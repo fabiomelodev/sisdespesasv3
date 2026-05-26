@@ -21,8 +21,6 @@ class Transaction extends Model
 
     public const GOAL = 'goal';
 
-    public const TRANSFER = 'transfer';
-
     protected static function boot()
     {
         parent::boot();
@@ -34,40 +32,6 @@ class Transaction extends Model
                 $model->invoice_id = $invoice->id;
             }
         });
-
-        static::created(function ($transaction) {
-            $transaction->adjustBalances(true);
-        });
-
-        static::deleted(function ($transaction) {
-            $transaction->adjustBalances(false); // Reverte o cálculo ao deletar
-        });
-    }
-
-    public function adjustBalances(bool $isIncrementing)
-    {
-        $factor = $isIncrementing ? 1 : -1;
-
-        if ($this->destination_account_id) {
-            if ($this->type === static::EXPENSE) {
-                $this->account->decrement('balance', $this->amount * $factor);
-            } elseif ($this->type === static::INCOME) {
-                $this->account->increment('balance', $this->amount * $factor);
-            } elseif ($this->type === static::TRANSFER) {
-                $this->account->decrement('balance', $this->amount * $factor);
-                $this->destinationAccount->increment('balance', $this->amount * $factor);
-            }
-        }
-
-        if ($this->goal_id) {
-            if ($this->type === static::EXPENSE) {
-                $this->goal->decrement('balance', $this->amount * $factor);
-            } elseif ($this->type === static::INCOME) {
-                $this->goal->increment('balance', $this->amount * $factor);
-            } elseif ($this->type === static::TRANSFER || $this->type === static::GOAL) {
-                $this->goal->increment('balance', $this->amount * $factor);
-            }
-        }
     }
 
     public function scopeIsExpense(Builder $query): Builder
@@ -85,14 +49,14 @@ class Transaction extends Model
         return $query->where('is_paid', 1);
     }
 
+    public function scopeNotIsPaid(Builder $query): Builder
+    {
+        return $query->where('is_paid', 0);
+    }
+
     public function scopeMonthCurrent(Builder $query): Builder
     {
         return $query->whereMonth('transaction_date', now()->month)->whereYear('transaction_date', now()->year);
-    }
-
-    public function scopeIsTransfer(Builder $query): Builder
-    {
-        return $query->where('type', static::TRANSFER);
     }
 
     public function scopeIsGoal(Builder $query): Builder
@@ -113,11 +77,6 @@ class Transaction extends Model
     public function creditCard(): BelongsTo
     {
         return $this->belongsTo(CreditCard::class);
-    }
-
-    public function destinationAccount(): BelongsTo
-    {
-        return $this->belongsTo(Account::class, 'destination_account_id');
     }
 
     public function goal(): BelongsTo
