@@ -52,11 +52,11 @@ class Dashboard extends BaseDashboard
     {
         return [
             ControlFinancialStatsOverview::class,
-            TransactionsChartBarYearWidget::class,
                 // GoalsTableWidget::class,
             RecurringTransactionsTableWidget::class,
             InvoicesTableWidget::class,
             InvoicesNextMontTableWidget::class,
+            TransactionsChartBarYearWidget::class,
             TotalTransactionsExpenseByCategoriesTableWidget::class,
             CategoryExpenseAnalysisTable::class,
             // TransactionsChartWidget::class,
