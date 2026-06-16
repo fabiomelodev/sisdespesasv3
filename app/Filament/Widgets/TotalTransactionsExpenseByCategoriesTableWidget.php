@@ -34,12 +34,9 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
                 $query->from('transactions')
                     ->selectRaw('COALESCE(SUM(amount), 0)')
                     ->whereColumn('transactions.category_id', 'categories.id')
-                    // ->where('is_paid', 1)
                     ->where('type', 'expense')
-                    // Aplicando o filtro dinâmico dentro da subquery
                     ->when($startDate, fn($q) => $q->whereDate('transaction_date', '>=', $startDate))
                     ->when($endDate, fn($q) => $q->whereDate('transaction_date', '<=', $endDate))
-                    // Fallback para o mês atual caso os filtros estejam vazios
                     ->when(!$startDate && !$endDate, function ($q) {
                         $q->whereMonth('transaction_date', now()->month)
                             ->whereYear('transaction_date', now()->year);

@@ -8,7 +8,7 @@ use Flowframe\Trend\Trend;
 
 class TransactionsChartBarYearWidget extends ChartWidget
 {
-    protected int|string|array $columnSpan = 2;
+    protected int|string|array $columnSpan = 'full';
 
     protected ?string $heading = 'Rendas x Despesas | Anual';
 
