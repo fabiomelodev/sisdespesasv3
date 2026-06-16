@@ -76,7 +76,7 @@ class RecurringTransactionsTableWidget extends TableWidget
                 TextColumn::make('name')
                     ->label('Nome')
                     ->weight(FontWeight::Bold)
-                    ->formatStateUsing(fn(string $state): string => Str::limit($state, 10))
+                    ->formatStateUsing(fn(string $state): string => Str::limit($state, 20))
                     ->size(TextSize::ExtraSmall)
                     ->sortable(),
                 TextColumn::make('amount')
