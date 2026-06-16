@@ -66,7 +66,7 @@ class TransactionForm
                                     }),
                                 Select::make('transaction_group_id')
                                     ->label('Compra Parcelada')
-                                    ->relationship('transactionGroup', 'name'),
+                                    ->relationship('transactionGroup', 'name', fn(Builder $query): Builder => $query->notIsPaid()),
                                 TextInput::make('installment_number')
                                     ->label('Parcela')
                                     ->numeric()

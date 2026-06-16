@@ -32,6 +32,22 @@ class Transaction extends Model
                 $model->invoice_id = $invoice->id;
             }
         });
+
+        static::updated(function ($model) {
+            if ($model->is_paid) {
+                if ($model->transactionGroup()->exists()) {
+                    $transactionGroup = $model->transactionGroup;
+
+                    $transaction = $transactionGroup->transactions()->orderBy('transaction_date', 'desc')->first();
+
+                    if ($transaction->is_paid) {
+                        $transactionGroup->is_paid = 1;
+
+                        $transactionGroup->save();
+                    }
+                }
+            }
+        });
     }
 
     public function scopeIsExpense(Builder $query): Builder

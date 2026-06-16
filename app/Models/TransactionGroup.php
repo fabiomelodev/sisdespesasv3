@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -44,6 +45,16 @@ class TransactionGroup extends Model
                 $transaction->delete();
             });
         });
+    }
+
+    public function scopeIsPaid(Builder $query): Builder
+    {
+        return $query->where('is_paid', 1);
+    }
+
+    public function scopeNotIsPaid(Builder $query): Builder
+    {
+        return $query->where('is_paid', 0);
     }
 
     public function account(): BelongsTo
