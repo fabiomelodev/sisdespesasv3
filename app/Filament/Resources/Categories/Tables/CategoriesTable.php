@@ -23,10 +23,8 @@ class CategoriesTable
                 TextColumn::make('type')
                     ->label('Tipo')
                     ->badge()
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'expense' => 'Despesa',
-                        'income' => 'Renda',
-                    }),
+                    ->formatStateUsing(fn(string $state): string => $state == 'income' ? 'Renda' : 'Despesa')
+                    ->color(fn(string $state): string => $state == 'income' ? 'success' : 'danger'),
                 TextColumn::make('created_at')
                     ->label('Criado Em')
                     ->dateTime('d/m/Y')
