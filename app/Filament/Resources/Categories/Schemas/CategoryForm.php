@@ -30,6 +30,10 @@ class CategoryForm
                     ->schema([
                         Section::make()
                             ->schema([
+                                TextInput::make('limit')
+                                    ->label('Limite')
+                                    ->prefix('R$')
+                                    ->required(),
                                 Select::make('type')
                                     ->label('Tipo')
                                     ->options([

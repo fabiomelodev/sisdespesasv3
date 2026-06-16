@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categories\Tables;
 
+use App\Helpers\FormatCurrency;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -25,6 +26,8 @@ class CategoriesTable
                     ->badge()
                     ->formatStateUsing(fn(string $state): string => $state == 'income' ? 'Renda' : 'Despesa')
                     ->color(fn(string $state): string => $state == 'income' ? 'success' : 'danger'),
+                TextColumn::make('limit')->label('Valor')
+                    ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
                 TextColumn::make('created_at')
                     ->label('Criado Em')
                     ->dateTime('d/m/Y')

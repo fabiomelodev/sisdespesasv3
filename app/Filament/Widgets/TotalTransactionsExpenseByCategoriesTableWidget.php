@@ -13,6 +13,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget;
+use Illuminate\Database\Eloquent\Model;
+use Tapp\FilamentProgressBarColumn\Tables\Columns\ProgressBarColumn;
 
 class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
 {
@@ -69,7 +71,6 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
                         Stack::make([
                             TextColumn::make('percentage')
                                 ->state(function ($record) use ($grandTotal) {
-                                    // Cálculo dinâmico da porcentagem baseada no total filtrado
                                     if ($grandTotal <= 0)
                                         return 0;
                                     return ($record->totalExpenses / $grandTotal) * 100;
@@ -77,9 +78,35 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
                                 ->formatStateUsing(fn($state): string => number_format($state, 0, ',', '.') . '%')
                                 ->size(TextSize::Large)
                                 ->weight(FontWeight::Bold)
-                                ->color('danger')
+                                ->color('danger'),
                         ])->alignment(Alignment::Right),
-                    ])
+                    ]),
+                ProgressBarColumn::make('percentage')
+                    ->state(function ($record) {
+                        if ($record->limit <= 0)
+                            return 0;
+
+                        return ($record->totalExpenses * 100) / $record->limit;
+                    })
+                    ->maxValue(100)
+                    ->dangerColor('#22c55e')
+                    ->warningColor('#f59e0b')
+                    ->successColor('#ef4444')
+                    ->dangerLabel(function (Model $record): string {
+                        $totalExpenses = FormatCurrency::getFormatCurrency($record->totalExpenses);
+
+                        $limit = FormatCurrency::getFormatCurrency($record->limit);
+
+                        return "Controlado! {$totalExpenses} / {$limit}";
+                    })
+                    ->warningLabel('')
+                    ->successLabel(function (Model $record): string {
+                        $totalExpenses = FormatCurrency::getFormatCurrency($record->totalExpenses);
+
+                        $limit = FormatCurrency::getFormatCurrency($record->limit);
+
+                        return "Cuidado! {$totalExpenses} / {$limit}";
+                    }),
             ])
             ->contentGrid([
                 'md' => 2,
