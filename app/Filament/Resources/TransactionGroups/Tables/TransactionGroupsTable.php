@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TransactionGroups\Tables;
 
+use App\Helpers\FormatCurrency;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -29,12 +30,17 @@ class TransactionGroupsTable
                 TextColumn::make('total_amount')
                     ->label('Total')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
                 TextColumn::make('purchase_date')
                     ->label('Data da Compra')
                     ->date('d/m/Y')
                     ->sortable(),
-
+                TextColumn::make('is_paid')
+                    ->label('Pago')
+                    ->badge()
+                    ->formatStateUsing(fn($state): string => $state ? 'Sim' : 'Não')
+                    ->color(fn($state): string => $state ? 'success' : 'danger')
             ])
             ->filters([
                 //
