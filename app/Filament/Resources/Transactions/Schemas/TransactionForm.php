@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Schemas;
 
+use App\Models\CreditCard;
 use App\Models\Transaction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -12,6 +13,7 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -36,6 +38,13 @@ class TransactionForm
                             ->label('Meio de Pagamento')
                             ->required()
                             ->live()
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state == 'credit') {
+                                    $set('type', Transaction::EXPENSE);
+                                } else {
+                                    $set('type', '');
+                                }
+                            })
                             ->options([
                                 'debit' => 'Débito',
                                 'credit' => 'Crédito',
@@ -47,7 +56,14 @@ class TransactionForm
                             ->schema([
                                 Select::make('credit_card_id')
                                     ->label('Cartão de Crédito')
-                                    ->relationship('creditCard', 'name'),
+                                    ->relationship('creditCard', 'name')
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Set $set) {
+                                        $creditCard = CreditCard::find($state);
+
+                                        $set('account_id', $creditCard->account->id);
+                                    }),
                                 Select::make('transaction_group_id')
                                     ->label('Compra Parcelada')
                                     ->relationship('transactionGroup', 'name'),
@@ -77,7 +93,8 @@ class TransactionForm
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
                                     ->relationship('account', 'name')
-                                    ->required(),
+                                    ->required()
+                                    ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false),
                                 Select::make('goal_id')
                                     ->label('Meta')
                                     ->relationship('goal', 'name')
@@ -99,6 +116,7 @@ class TransactionForm
                                     ->onColor('success')
                                     ->offColor('danger')
                                     ->helperText(fn(Get $get): string => $get('payment_method') == 'credit' ? 'Pague a despesa pela fatura' : '')
+                                    ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false)
                                     ->required()
                             ]),
                         Section::make()
