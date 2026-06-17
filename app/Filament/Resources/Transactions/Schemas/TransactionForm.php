@@ -93,8 +93,8 @@ class TransactionForm
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
                                     ->relationship('account', 'name')
-                                    ->required()
-                                    ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false),
+                                    ->required(),
+                                // ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false),
                                 Select::make('goal_id')
                                     ->label('Meta')
                                     ->relationship('goal', 'name')
