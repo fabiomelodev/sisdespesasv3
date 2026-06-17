@@ -116,7 +116,7 @@ class TransactionForm
                                     ->onColor('success')
                                     ->offColor('danger')
                                     ->helperText(fn(Get $get): string => $get('payment_method') == 'credit' ? 'Pague a despesa pela fatura' : '')
-                                    ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false)
+                                    // ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false)
                                     ->required()
                             ]),
                         Section::make()
