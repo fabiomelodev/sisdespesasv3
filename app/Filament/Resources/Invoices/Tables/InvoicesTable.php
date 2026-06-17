@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Invoices\Tables;
 
+use App\Helpers\FormatCurrency;
 use Carbon\Carbon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -32,6 +33,8 @@ class InvoicesTable
                 TextColumn::make('reference_month')
                     ->label('Mês de Referência')
                     ->date('F Y'),
+                TextColumn::make('amount')->label('Valor')
+                    ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
                 TextColumn::make('closing_date')
                     ->label('Fechamento')
                     ->date('d/m/Y'),
