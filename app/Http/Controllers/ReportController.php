@@ -12,16 +12,24 @@ class ReportController extends Controller
 {
     public function show()
     {
+        $month = request()->query('month', now()->month);
+        $year = request()->query('year', now()->year);
+
+        $applyDateFilter = function ($query, string $column = 'transaction_date') use ($month, $year) {
+            return $query
+                ->when($year, fn($q) => $q->whereYear($column, $year))
+                ->when($month, fn($q) => $q->whereMonth($column, $month))
+                ->when(!$year && !$month, fn($q) => $q->whereYear($column, now()->year)->whereMonth($column, now()->month));
+        };
+
         $incomesPaidMonthCurrentSum = Transaction::query()
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
+            ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))
             ->isIncome()
             ->isPaid()
             ->sum('amount');
 
         $expensesPaidMonthCurrentSum = Transaction::query()
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
+            ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))
             ->isExpense()
             ->whereIn('payment_method', ['debit', 'pix'])
             ->whereNull('recurring_transaction_id')
@@ -29,8 +37,7 @@ class ReportController extends Controller
             ->sum('amount');
 
         $recurringTransactionsMonthCurrentSum = Transaction::query()
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
+            ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))
             ->isExpense()
             ->where('payment_method', '!=', 'credit')
             ->whereHas('recurringTransaction', function (Builder $query) {
@@ -38,21 +45,20 @@ class ReportController extends Controller
             })
             ->sum('amount');
 
-        $incomes = Transaction::query()->whereYear('transaction_date', now()->year)->whereMonth('transaction_date', now()->month)->isIncome()->isPaid()->get();
+        $incomes = Transaction::query()->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))->isIncome()->isPaid()->get();
 
-        $expenses = Transaction::query()->orderBy('transaction_date', 'desc')->whereYear('transaction_date', now()->year)->whereMonth('transaction_date', now()->month)->isExpense()->isPaid()->get();
+        $expenses = Transaction::query()->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))->orderBy('transaction_date', 'desc')->isExpense()->isPaid()->get();
 
         $expensesCategory = Category::query()
             ->orderBy('name', 'asc')
             ->select('categories.*')
-            ->selectSub(function ($query) {
+            ->selectSub(function ($query) use ($applyDateFilter) {
                 $query->from('transactions')
                     ->selectRaw('COALESCE(SUM(amount), 0)')
                     ->whereColumn('transactions.category_id', 'categories.id')
                     // ->where('is_paid', 1)
                     ->where('type', 'expense')
-                    ->whereYear('transaction_date', now()->year)
-                    ->whereMonth('transaction_date', now()->month);
+                    ->tap(fn($query) => $applyDateFilter($query, 'transaction_date'));
             }, 'totalExpenses')
             ->having('totalExpenses', '>', 0)
             ->get();
@@ -60,8 +66,7 @@ class ReportController extends Controller
         $invoices = Invoice::query()
             ->select('invoices.*')
             // Aplicando o filtro de data dinâmico
-            ->whereYear('due_date', now()->year)
-            ->whereMonth('due_date', now()->month)
+            ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'due_date'))
             ->selectSub(function ($query) {
                 $query->from('transactions')
                     ->selectRaw('COALESCE(SUM(amount), 0)')
