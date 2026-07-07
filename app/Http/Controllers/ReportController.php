@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Invoice;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -63,12 +64,12 @@ class ReportController extends Controller
             ->having('totalExpenses', '>', 0)
             ->get();
 
+        $targetDate = Carbon::createFromDate($year, $month, 1)->addMonthNoOverflow();
+
         $invoices = Invoice::query()
             ->select('invoices.*')
-            // Aplicando o filtro de data dinâmico
-            ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'due_date'))
-            ->whereMonth('due_date', now()->copy()->addMonthNoOverflow()->month)
-            ->whereYear('due_date', $year)
+            ->whereMonth('due_date', $targetDate->month)
+            ->whereYear('due_date', $targetDate->year)
             ->selectSub(function ($query) {
                 $query->from('transactions')
                     ->selectRaw('COALESCE(SUM(amount), 0)')
