@@ -29,7 +29,11 @@ class Category extends Model
 
                 $incomesSum = Transaction::monthCurrent()->isPaid()->isIncome()->sum('amount');
 
-                $result = ($expensesByCategorySum / $incomesSum) * 100;
+                if (isset($expensesByCategorySum) && isset($incomesSum) && $incomesSum != 0) {
+                    $result = ($expensesByCategorySum / $incomesSum) * 100;
+                } else {
+                    $result = 0;
+                }
 
                 return $result;
             }
