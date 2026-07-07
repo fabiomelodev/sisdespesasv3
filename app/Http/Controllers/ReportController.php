@@ -67,6 +67,8 @@ class ReportController extends Controller
             ->select('invoices.*')
             // Aplicando o filtro de data dinâmico
             ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'due_date'))
+            ->whereMonth('due_date', now()->copy()->addMonthNoOverflow()->month)
+            ->whereYear('due_date', $year)
             ->selectSub(function ($query) {
                 $query->from('transactions')
                     ->selectRaw('COALESCE(SUM(amount), 0)')
