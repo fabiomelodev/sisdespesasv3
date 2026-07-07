@@ -47,8 +47,8 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
             ->selectSub(function ($query) {
                 $query->from('transactions')
                     ->selectRaw('COALESCE(SUM(transactions.amount), 0)')
-                    ->whereColumn('transactions.invoice_id', 'invoices.id')
-                    ->whereNull('transactions.recurring_transaction_id');
+                    ->whereColumn('transactions.invoice_id', 'invoices.id');
+                // ->whereNull('transactions.recurring_transaction_id');
             }, 'totalExpenses')
             ->having('totalExpenses', '>', 0)
             ->get() // Usar get() antes do sum se houver 'having' complexo ou sum direto:

@@ -14,6 +14,7 @@ class ReportController extends Controller
     public function show()
     {
         $month = request()->query('month', now()->month);
+
         $year = request()->query('year', now()->year);
 
         $applyDateFilter = function ($query, string $column = 'transaction_date') use ($month, $year) {
