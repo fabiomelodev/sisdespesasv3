@@ -26,7 +26,7 @@ class Transaction extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if ($model->payment_method == 'credit') {
+            if ($model->payment_method == 'credit' && $model->invoice_id == null) {
                 $invoice = Invoice::invoiceByTransaction($model);
 
                 $model->invoice_id = $invoice->id;

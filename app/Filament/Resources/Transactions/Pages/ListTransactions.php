@@ -9,7 +9,6 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ListTransactions extends ListRecords
 {
