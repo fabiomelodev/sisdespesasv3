@@ -45,7 +45,7 @@ class TransactionImporter extends Importer
 
                     return (float) $cleaned;
                 })
-                ->rules(['required', 'integer']),
+                ->rules(['required']),
             ImportColumn::make('transaction_date')
                 ->label('Data da Transação')
                 ->requiredMapping()
