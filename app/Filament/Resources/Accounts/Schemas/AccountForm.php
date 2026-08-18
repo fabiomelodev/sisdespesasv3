@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Accounts\Schemas;
 
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\{ColorPicker, Select, TextInput, Toggle};
+use Filament\Forms\Components\{Select, TextInput, Toggle};
 use Filament\Schemas\Components\{Group, Section};
 use Filament\Infolists\Components\TextEntry;
 use Illuminate\Database\Eloquent\Model;
@@ -36,13 +36,6 @@ class AccountForm
                                         'investment' => 'Investimento',
                                     ])
                                     ->default('checking')
-                                    ->required(),
-                                TextInput::make('initial_balance')
-                                    ->label('Saldo Inicial')
-                                    ->required()
-                                    ->numeric(),
-                                ColorPicker::make('color')
-                                    ->label('Cor')
                                     ->required(),
                                 Toggle::make('status')
                             ]),

@@ -17,8 +17,6 @@ class AccountSeeder extends Seeder
             [
                 'name' => 'NuBank',
                 'type' => 'checking',
-                'initial_balance' => 100.00,
-                'color' => '#000000',
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now()
@@ -27,8 +25,6 @@ class AccountSeeder extends Seeder
             [
                 'name' => 'Inter',
                 'type' => 'checking',
-                'initial_balance' => 100.00,
-                'color' => '#000000',
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now()

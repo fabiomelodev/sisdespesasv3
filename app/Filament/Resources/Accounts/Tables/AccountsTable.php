@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Accounts\Tables;
 
 use App\Helpers\FormatCurrency;
+use App\Models\Account;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\{IconColumn, TextColumn};
 use Filament\Tables\Filters\SelectFilter;
@@ -28,12 +29,16 @@ class AccountsTable
                         'wallet' => 'Carteira',
                         'investment' => 'Investimento',
                     }),
-                TextColumn::make('initial_balance')
-                    ->label('Saldo Inicial')
-                    ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
-                TextColumn::make('balance')
-                    ->label('Saldo Atual')
-                    ->formatStateUsing(callback: fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
+                TextColumn::make('current_month_net')
+                    ->label('Movimentação (Mês Atual)')
+                    ->getStateUsing(function (Account $record): float {
+                        $income = $record->transactions()->monthCurrent()->isPaid()->isIncome()->sum('amount');
+                        $expense = $record->transactions()->monthCurrent()->isPaid()->isExpense()->sum('amount');
+
+                        return $income - $expense;
+                    })
+                    ->formatStateUsing(fn(float $state): string => FormatCurrency::getFormatCurrency($state))
+                    ->color(fn(float $state): string => $state >= 0 ? 'success' : 'danger'),
                 IconColumn::make('status'),
                 TextColumn::make('created_at')
                     ->label('Criado Em')
@@ -49,7 +54,7 @@ class AccountsTable
                         'investment' => 'Investimento',
                     ]),
                 SelectFilter::make('status')
-                    ->label('Tipo')
+                    ->label('Status')
                     ->options([
                         true => 'Ativo',
                         false => 'Inativo',
