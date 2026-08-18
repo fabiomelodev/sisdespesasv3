@@ -9,11 +9,11 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -34,12 +34,10 @@ class TransactionsTable
                     ->formatStateUsing(fn(string $state): string => match ($state) {
                         Transaction::EXPENSE => 'Despesa',
                         Transaction::INCOME => 'Renda',
-                        Transaction::GOAL => 'Meta',
                     })
                     ->color(fn(string $state): string => match ($state) {
                         Transaction::EXPENSE => 'danger',
                         Transaction::INCOME => 'success',
-                        Transaction::GOAL => 'warning',
                     }),
                 TextColumn::make('category.name')
                     ->label('Categoria'),
@@ -98,6 +96,14 @@ class TransactionsTable
                         0 => 'Pendente',
                         1 => 'Pago'
                     ]),
+                TernaryFilter::make('is_recurring')
+                    ->label('Recorrente')
+                    ->attribute('recurring_transaction_id')
+                    ->nullable()
+                    ->trueLabel('Recorrentes')
+                    ->falseLabel('Não recorrentes')
+                    ->placeholder('Todas')
+                    ->default(false),
             ])
             ->recordActions([
                 EditAction::make()

@@ -19,17 +19,19 @@ class Transaction extends Model
 
     public const INCOME = 'income';
 
-    public const GOAL = 'goal';
-
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            if ($model->payment_method == 'credit' && $model->invoice_id == null) {
-                $invoice = Invoice::invoiceByTransaction($model);
+        static::saving(function ($model) {
+            if ($model->payment_method == 'credit') {
+                if ($model->invoice_id == null || $model->isDirty('transaction_date') || $model->isDirty('credit_card_id')) {
+                    $invoice = Invoice::invoiceByTransaction($model);
 
-                $model->invoice_id = $invoice->id;
+                    $model->invoice_id = $invoice->id;
+                }
+            } elseif ($model->invoice_id !== null) {
+                $model->invoice_id = null;
             }
         });
 
@@ -38,12 +40,20 @@ class Transaction extends Model
                 if ($model->transactionGroup()->exists()) {
                     $transactionGroup = $model->transactionGroup;
 
-                    $transaction = $transactionGroup->transactions()->orderBy('transaction_date', 'desc')->first();
-
-                    if ($transaction->is_paid) {
+                    if (!$transactionGroup->is_paid && $transactionGroup->transactions()->notIsPaid()->doesntExist()) {
                         $transactionGroup->is_paid = 1;
 
                         $transactionGroup->save();
+                    }
+                }
+
+                if ($model->invoice_id !== null) {
+                    $invoice = $model->invoice;
+
+                    if ($invoice && !$invoice->is_paid && $invoice->transactions()->notIsPaid()->doesntExist()) {
+                        $invoice->is_paid = 1;
+
+                        $invoice->save();
                     }
                 }
             }
@@ -75,11 +85,6 @@ class Transaction extends Model
         return $query->whereMonth('transaction_date', now()->month)->whereYear('transaction_date', now()->year);
     }
 
-    public function scopeIsGoal(Builder $query): Builder
-    {
-        return $query->where('type', static::GOAL);
-    }
-
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
@@ -95,11 +100,6 @@ class Transaction extends Model
         return $this->belongsTo(CreditCard::class);
     }
 
-    public function goal(): BelongsTo
-    {
-        return $this->belongsTo(Goal::class);
-    }
-
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
@@ -108,11 +108,6 @@ class Transaction extends Model
     public function recurringTransaction(): BelongsTo
     {
         return $this->belongsTo(RecurringTransaction::class);
-    }
-
-    public function reservation()
-    {
-        return $this->belongsTo(Reservation::class);
     }
 
     public function transactionGroup(): BelongsTo

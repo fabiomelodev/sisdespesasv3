@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Transactions\Schemas;
 
 use App\Models\CreditCard;
+use App\Models\Invoice;
 use App\Models\Transaction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -56,7 +57,7 @@ class TransactionForm
                             ->schema([
                                 Select::make('credit_card_id')
                                     ->label('Cartão de Crédito')
-                                    ->relationship('creditCard', 'name')
+                                    ->relationship('creditCard', 'name', fn(Builder $query): Builder => $query->where('is_active', true))
                                     ->required()
                                     ->live()
                                     ->afterStateUpdated(function ($state, Set $set) {
@@ -66,10 +67,32 @@ class TransactionForm
                                     }),
                                 Select::make('transaction_group_id')
                                     ->label('Compra Parcelada')
-                                    ->relationship('transactionGroup', 'name', fn(Builder $query): Builder => $query->notIsPaid()),
+                                    ->relationship('transactionGroup', 'name')
+                                    ->visible(fn(?Model $record): bool => $record?->transaction_group_id !== null)
+                                    ->disabled()
+                                    ->helperText('Definida automaticamente ao criar uma Compra Parcelada.'),
                                 TextInput::make('installment_number')
                                     ->label('Parcela')
                                     ->numeric()
+                                    ->visible(fn(?Model $record): bool => $record?->transaction_group_id !== null)
+                                    ->disabled()
+                            ]),
+                        Fieldset::make('Fatura')
+                            ->visible(fn(?Model $record, Get $get): bool => $record !== null && $get('payment_method') === 'credit')
+                            ->columns(2)
+                            ->schema([
+                                Toggle::make('override_invoice')
+                                    ->label('Alterar fatura manualmente')
+                                    ->live()
+                                    ->dehydrated(false)
+                                    ->default(false),
+                                Select::make('invoice_id')
+                                    ->label('Fatura')
+                                    ->relationship('invoice', 'reference_month', fn(Builder $query, Get $get): Builder => $query->where('credit_card_id', $get('credit_card_id')))
+                                    ->getOptionLabelFromRecordUsing(fn(Invoice $record): string => ucfirst($record->reference_month->translatedFormat('F \d\e Y')) . ' — vence ' . $record->due_date->format('d/m/Y'))
+                                    ->disabled(fn(Get $get): bool => !$get('override_invoice'))
+                                    ->required()
+                                    ->helperText('Por padrão, a fatura é escolhida automaticamente pela data da transação e o fechamento do cartão.'),
                             ])
                     ]),
                 Group::make()
@@ -80,6 +103,7 @@ class TransactionForm
                                 TextInput::make('amount')
                                     ->label('Valor')
                                     ->prefix('R$')
+                                    ->numeric()
                                     ->required(),
                                 Select::make('type')
                                     ->label('Tipo')
@@ -88,27 +112,14 @@ class TransactionForm
                                     ->options([
                                         Transaction::EXPENSE => 'Despesa',
                                         Transaction::INCOME => 'Renda',
-                                        Transaction::GOAL => 'Meta',
                                     ]),
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
-                                    ->relationship('account', 'name')
-                                    ->required(),
-                                // ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false),
-                                Select::make('goal_id')
-                                    ->label('Meta')
-                                    ->relationship('goal', 'name')
-                                    ->visible(fn(Get $get) => $get('type') === Transaction::GOAL)
+                                    ->relationship('account', 'name', fn(Builder $query): Builder => $query->where('status', true))
                                     ->required(),
                                 Select::make('category_id')
                                     ->label('Categoria')
                                     ->relationship('category', 'name', fn(Builder $query, Get $get): Builder => $query->where('type', $get('type')))
-                                    ->visible(fn(Get $get): bool => match ($get('type')) {
-                                        Transaction::EXPENSE => true,
-                                        Transaction::INCOME => true,
-                                        Transaction::GOAL => false,
-                                        default => true
-                                    })
                                     ->required(),
                                 Toggle::make('is_paid')
                                     ->label('Pago')
@@ -116,7 +127,6 @@ class TransactionForm
                                     ->onColor('success')
                                     ->offColor('danger')
                                     ->helperText(fn(Get $get): string => $get('payment_method') == 'credit' ? 'Pague a despesa pela fatura' : '')
-                                    // ->hidden(fn(Get $get): bool => $get('payment_method') == 'credit' ? true : false)
                                     ->required()
                             ]),
                         Section::make()

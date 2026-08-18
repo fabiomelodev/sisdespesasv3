@@ -11,11 +11,11 @@ class TransactionStats extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        $expensesMonthCurrentSum = Transaction::isExpense()->monthCurrent()->sum('amount');
+        $expensesMonthCurrentSum = Transaction::isExpense()->isPaid()->monthCurrent()->sum('amount');
 
         $expensesSum = Transaction::isPaid()->isExpense()->sum('amount');
 
-        $incomesMonthCurrentSum = Transaction::isIncome()->monthCurrent()->sum('amount');
+        $incomesMonthCurrentSum = Transaction::isIncome()->isPaid()->monthCurrent()->sum('amount');
 
         $incomesSum = Transaction::isPaid()->isIncome()->sum('amount');
 
