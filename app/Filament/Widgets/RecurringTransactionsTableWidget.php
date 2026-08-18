@@ -60,7 +60,7 @@ class RecurringTransactionsTableWidget extends TableWidget
             ' | Pago: ' . FormatCurrency::getFormatCurrency($transactionsPaidSum);
 
         return $table
-            ->query(fn() => $baseQuery->orderBy('is_paid', 'desc'))
+            ->query(fn() => $baseQuery->orderBy('is_paid', 'asc')->orderBy('transaction_date', 'asc'))
             ->heading('Transações Recorrentes no Débito')
             ->description($description)
             ->searchable(false)

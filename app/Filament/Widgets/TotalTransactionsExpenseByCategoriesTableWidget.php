@@ -31,7 +31,6 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
         // 2. Construção da Query
         $query = Category::query()
             ->isExpense()
-            ->orderBy('name', 'asc')
             ->select('categories.*')
             ->selectSub(function ($query) use ($startDate, $endDate) {
                 $query->from('transactions')
@@ -45,7 +44,8 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
                             ->whereYear('transaction_date', now()->year);
                     });
             }, 'totalExpenses')
-            ->having('totalExpenses', '>', 0);
+            ->having('totalExpenses', '>', 0)
+            ->orderBy('totalExpenses', 'desc');
 
         // 3. Cálculo do Total Geral e Porcentagem
         $categoriesData = $query->get();
