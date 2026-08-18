@@ -17,7 +17,7 @@ class RecurringTransactionsTableWidget extends TableWidget
 {
     use InteractsWithPageFilters;
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 2;
 
     public function table(Table $table): Table
     {

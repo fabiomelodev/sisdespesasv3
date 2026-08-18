@@ -19,7 +19,7 @@ class InvoicesTableWidget extends TableWidget
 {
     use InteractsWithPageFilters;
 
-    protected int|string|array $columnSpan = 2;
+    protected int|string|array $columnSpan = 3;
 
     public function table(Table $table): Table
     {

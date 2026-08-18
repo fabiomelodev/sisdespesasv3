@@ -12,7 +12,7 @@ class CategoryBudgetAlertsWidget extends Widget
 
     protected string $view = 'filament.widgets.category-budget-alerts';
 
-    protected int|string|array $columnSpan = 1;
+    protected int|string|array $columnSpan = 2;
 
     public function getAlerts(): array
     {

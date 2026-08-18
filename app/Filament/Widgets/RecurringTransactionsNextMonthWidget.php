@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 class RecurringTransactionsNextMonthWidget extends TableWidget
 {
-    protected int|string|array $columnSpan = 1;
+    protected int|string|array $columnSpan = 2;
 
     public function table(Table $table): Table
     {

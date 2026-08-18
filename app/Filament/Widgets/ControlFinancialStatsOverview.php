@@ -16,6 +16,11 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    protected function getColumns(): int|array|null
+    {
+        return 4;
+    }
+
     protected function getStats(): array
     {
         // 1. Captura as datas dos filtros
@@ -105,24 +110,29 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
         return [
             Stat::make('Entradas', FormatCurrency::getFormatCurrency($incomesPaidMonthCurrentSum))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('success'),
+                ->color('success')
+                ->columnSpan(1),
 
             Stat::make('Saídas Realizadas', FormatCurrency::getFormatCurrency($expensesInvoicesMonthCurrentSum))
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
-                ->color('danger'),
+                ->color('danger')
+                ->columnSpan(1),
 
             Stat::make('Despesas Recorrentes', FormatCurrency::getFormatCurrency($recurringTransactionsMonthCurrentSum))
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
-                ->color('danger'),
+                ->color('danger')
+                ->columnSpan(1),
 
             Stat::make('Livre', FormatCurrency::getFormatCurrency($remainingMonthCurrentSum))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('primary'),
+                ->color('primary')
+                ->columnSpan(1),
 
             Stat::make('Livre Projetado', FormatCurrency::getFormatCurrency($projectedRemainingMonthCurrentSum))
                 ->description('Considerando entradas e saídas ainda pendentes')
                 ->descriptionIcon('heroicon-m-calendar-days')
-                ->color($projectedRemainingMonthCurrentSum >= 0 ? 'primary' : 'danger'),
+                ->color($projectedRemainingMonthCurrentSum >= 0 ? 'primary' : 'danger')
+                ->columnSpan('full'),
         ];
     }
 }

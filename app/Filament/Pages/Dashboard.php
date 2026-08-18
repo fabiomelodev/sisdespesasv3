@@ -20,7 +20,7 @@ class Dashboard extends BaseDashboard
 
     public function getColumns(): int|array
     {
-        return 3;
+        return 4;
     }
 
     public function getTitle(): string|Htmlable
@@ -54,8 +54,8 @@ class Dashboard extends BaseDashboard
             ControlFinancialStatsOverview::class,
             CategoryBudgetAlertsWidget::class,
             CreditCardLimitAlertsWidget::class,
-            RecurringTransactionsNextMonthWidget::class,
             RecurringTransactionsTableWidget::class,
+            RecurringTransactionsNextMonthWidget::class,
             InvoicesTableWidget::class,
             InvoicesNextMontTableWidget::class,
             TransactionsChartBarYearWidget::class,

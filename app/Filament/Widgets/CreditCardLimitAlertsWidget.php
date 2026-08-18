@@ -9,7 +9,7 @@ class CreditCardLimitAlertsWidget extends Widget
 {
     protected string $view = 'filament.widgets.credit-card-limit-alerts';
 
-    protected int|string|array $columnSpan = 1;
+    protected int|string|array $columnSpan = 2;
 
     public function getAlerts(): array
     {
