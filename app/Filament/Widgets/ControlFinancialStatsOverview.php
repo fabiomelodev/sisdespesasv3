@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Helpers\FormatCurrency;
 use App\Models\Invoice;
-use App\Models\ReservationTransaction;
 use App\Models\Transaction;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
