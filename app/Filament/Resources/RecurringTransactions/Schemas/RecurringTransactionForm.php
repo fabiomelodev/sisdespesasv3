@@ -44,7 +44,10 @@ class RecurringTransactionForm
                             ->required()
                             ->columnSpan(1),
                         DatePicker::make('next_run_date')
-                            ->label('Próxima Data')
+                            ->label('Próxima Execução')
+                            ->helperText('Mês em que a próxima transação será gerada automaticamente. O dia não importa, só o mês/ano.')
+                            ->default(now()->startOfMonth())
+                            ->required()
                             ->columnSpan(1),
                     ]),
                 Group::make()
@@ -62,7 +65,7 @@ class RecurringTransactionForm
                                     ->required(),
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
-                                    ->relationship('account', 'name')
+                                    ->relationship('account', 'name', fn(Builder $query): Builder => $query->where('status', true))
                                     ->required(),
                                 Select::make('category_id')
                                     ->label('Categoria')
@@ -70,7 +73,7 @@ class RecurringTransactionForm
                                     ->required(),
                                 Select::make('credit_card_id')
                                     ->label('Cartão de Crédito')
-                                    ->relationship('creditCard', 'name'),
+                                    ->relationship('creditCard', 'name', fn(Builder $query): Builder => $query->where('is_active', true)),
                                 Toggle::make('is_active')
                                     ->label('Ativo')
                             ]),

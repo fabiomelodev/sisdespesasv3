@@ -9,6 +9,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class RecurringTransactionsTable
@@ -46,13 +47,28 @@ class RecurringTransactionsTable
                 TextColumn::make('amount')
                     ->label('Valor')
                     ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
+                TextColumn::make('next_run_date')
+                    ->label('Próxima Execução')
+                    ->date('m/Y')
+                    ->color(fn(?string $state): string => $state && \Illuminate\Support\Carbon::parse($state)->lt(now()->startOfMonth()) ? 'danger' : 'gray'),
                 ToggleColumn::make('is_active')
                     ->label('Ativo')
                     ->onColor('success')
                     ->offColor('danger')
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Tipo')
+                    ->options([
+                        'expense' => 'Despesa',
+                        'income' => 'Renda',
+                    ]),
+                SelectFilter::make('is_active')
+                    ->label('Status')
+                    ->options([
+                        true => 'Ativo',
+                        false => 'Inativo',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make()

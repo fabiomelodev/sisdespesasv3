@@ -29,10 +29,12 @@ class RunRecurringTransactions extends Command
      */
     public function handle()
     {
-        $firstDayOfMonth = Carbon::now()->startOfMonth();
+        $now = Carbon::now();
 
         $recurrings = RecurringTransaction::isActive()
-            ->whereDate('next_run_date', $firstDayOfMonth)
+            ->whereNotNull('next_run_date')
+            ->whereMonth('next_run_date', $now->month)
+            ->whereYear('next_run_date', $now->year)
             ->get();
 
         if ($recurrings->isEmpty()) {

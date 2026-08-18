@@ -37,19 +37,12 @@ class RecurringTransactionsTableWidget extends TableWidget
                         $subQuery->when($startDate, fn($q) => $q->whereDate('transaction_date', '>=', $startDate))
                             ->when($endDate, fn($q) => $q->whereDate('transaction_date', '<=', $endDate));
                     } else {
-                        // Comportamento padrão (Fallback) quando não há filtro selecionado
-                        $lastMonth = now()->subMonthNoOverflow();
+                        // Comportamento padrão (Fallback) quando não há filtro selecionado: mês atual.
+                        // (a query já exclui payment_method = credit acima, então só existe o caso "mês atual")
                         $currentMonth = now();
 
-                        $subQuery->where(function (Builder $q) use ($lastMonth) {
-                            $q->where('payment_method', 'credit')
-                                ->whereMonth('transaction_date', $lastMonth->month)
-                                ->whereYear('transaction_date', $lastMonth->year);
-                        })->orWhere(function (Builder $q) use ($currentMonth) {
-                            $q->where('payment_method', '!=', 'credit')
-                                ->whereMonth('transaction_date', $currentMonth->month)
-                                ->whereYear('transaction_date', $currentMonth->year);
-                        });
+                        $subQuery->whereMonth('transaction_date', $currentMonth->month)
+                            ->whereYear('transaction_date', $currentMonth->year);
                     }
                 });
         };
