@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\FormatCurrency;
 use App\Models\Category;
 use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
@@ -24,8 +25,8 @@ class CategoryExpenseAnalysisTable extends TableWidget
 
         // 2. Calcular os 3 meses baseados na referência
         $mesAtualRaw = $referenceDate->copy();
-        $mesMenos1Raw = $referenceDate->copy()->subMonth();
-        $mesMenos2Raw = $referenceDate->copy()->subMonths(2);
+        $mesMenos1Raw = $referenceDate->copy()->subMonthsNoOverflow(1);
+        $mesMenos2Raw = $referenceDate->copy()->subMonthsNoOverflow(2);
 
         $mesAtual = $mesAtualRaw->format('Y-m');
         $mesMenos1 = $mesMenos1Raw->format('Y-m');
@@ -33,7 +34,7 @@ class CategoryExpenseAnalysisTable extends TableWidget
 
         // 3. Query com as somas condicionais
         $query = Category::query()
-            ->select('categories.id', 'categories.name')
+            ->select('categories.id', 'categories.name', 'categories.limit')
             ->join('transactions', 'categories.id', '=', 'transactions.category_id')
             ->where('transactions.type', 'expense')
             // Filtramos a query principal para pegar apenas o range total dos 3 meses
@@ -45,12 +46,12 @@ class CategoryExpenseAnalysisTable extends TableWidget
                 SUM(CASE WHEN DATE_FORMAT(transaction_date, '%Y-%m') = '{$mesMenos1}' THEN amount ELSE 0 END) as gasto_mes_1,
                 SUM(CASE WHEN DATE_FORMAT(transaction_date, '%Y-%m') = '{$mesAtual}' THEN amount ELSE 0 END) as gasto_atual
             ")
-            ->groupBy('categories.id', 'categories.name');
+            ->groupBy('categories.id', 'categories.name', 'categories.limit');
 
         return $table
             ->query(fn(): Builder => $query)
             ->heading('Análise de Despesas por Categoria')
-            ->defaultSort('name', 'asc')
+            ->defaultSort('gasto_atual', 'desc')
             ->columns([
                 TextColumn::make('name')
                     ->label('Categoria')
@@ -66,7 +67,26 @@ class CategoryExpenseAnalysisTable extends TableWidget
 
                 TextColumn::make('gasto_atual')
                     ->label($endDate ? $mesAtualRaw->translatedFormat('M/Y') : 'Mês Atual')
-                    ->money('BRL'),
+                    ->money('BRL')
+                    ->weight(fn($record) => $record->limit > 0 && $record->gasto_atual >= $record->limit * 0.8
+                        ? \Filament\Support\Enums\FontWeight::Bold
+                        : null)
+                    ->color(function ($record): string {
+                        if ($record->limit <= 0) {
+                            return 'gray';
+                        }
+
+                        return match (true) {
+                            $record->gasto_atual >= $record->limit => 'danger',
+                            $record->gasto_atual >= $record->limit * 0.8 => 'warning',
+                            default => 'gray',
+                        };
+                    }),
+
+                TextColumn::make('limit')
+                    ->label('Orçamento')
+                    ->placeholder('—')
+                    ->formatStateUsing(fn(?string $state): ?string => (float) $state > 0 ? FormatCurrency::getFormatCurrency($state) : null),
 
                 TextColumn::make('media')
                     ->label('Média (Período)')

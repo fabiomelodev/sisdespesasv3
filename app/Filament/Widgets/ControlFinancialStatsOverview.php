@@ -65,18 +65,42 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
         $expensesInvoicesMonthCurrentSum = $invoicesMonthCurrentSum + $expensesPaidMonthCurrentSum;
 
         // --- Recurring ---
+        // Usa whereNotNull (em vez de exigir a recorrência ainda ativa) para
+        // ser o complemento exato de expensesPaidMonthCurrentSum acima: toda
+        // transação com recurring_transaction_id cai aqui, mesmo que a
+        // recorrência de origem tenha sido desativada depois. Sem isso, uma
+        // transação assim nao contava em nenhuma das duas somas.
         $recurringTransactionsMonthCurrentSum = Transaction::query()
             ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))
             ->isExpense()
             ->where('payment_method', '!=', 'credit')
-            ->whereHas('recurringTransaction', function (Builder $query) {
-                $query->isActive();
-            })
+            ->whereNotNull('recurring_transaction_id')
             ->sum('amount');
 
 
         // --- Cálculo Final ---
         $remainingMonthCurrentSum = $incomesPaidMonthCurrentSum - $expensesInvoicesMonthCurrentSum - $recurringTransactionsMonthCurrentSum;
+
+        // --- Projeção (considera o que ainda está pendente, como se tudo fosse pago) ---
+        // Entradas: pagas + pendentes (ex: salário que ainda não caiu)
+        $allIncomesMonthCurrentSum = Transaction::query()
+            ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))
+            ->isIncome()
+            ->sum('amount');
+
+        // Despesas avulsas em débito/pix (sem recorrência, sem fatura) ainda não pagas
+        $pendingAdHocExpensesSum = Transaction::query()
+            ->tap(fn(Builder $query): Builder => $applyDateFilter($query, 'transaction_date'))
+            ->isExpense()
+            ->whereIn('payment_method', ['debit', 'pix'])
+            ->whereNull('recurring_transaction_id')
+            ->notIsPaid()
+            ->sum('amount');
+
+        $projectedRemainingMonthCurrentSum = $allIncomesMonthCurrentSum
+            - $expensesInvoicesMonthCurrentSum
+            - $recurringTransactionsMonthCurrentSum
+            - $pendingAdHocExpensesSum;
 
         return [
             Stat::make('Entradas', FormatCurrency::getFormatCurrency($incomesPaidMonthCurrentSum))
@@ -94,6 +118,11 @@ class ControlFinancialStatsOverview extends StatsOverviewWidget
             Stat::make('Livre', FormatCurrency::getFormatCurrency($remainingMonthCurrentSum))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('primary'),
+
+            Stat::make('Livre Projetado', FormatCurrency::getFormatCurrency($projectedRemainingMonthCurrentSum))
+                ->description('Considerando entradas e saídas ainda pendentes')
+                ->descriptionIcon('heroicon-m-calendar-days')
+                ->color($projectedRemainingMonthCurrentSum >= 0 ? 'primary' : 'danger'),
         ];
     }
 }

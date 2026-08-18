@@ -3,7 +3,7 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
-use App\Filament\Widgets\{ControlFinancialStatsOverview, InvoicesTableWidget, RecurringTransactionsTableWidget, TotalTransactionsExpenseByCategoriesTableWidget, TransactionsChartBarYearWidget, TransactionsChartWidget};
+use App\Filament\Widgets\{CategoryBudgetAlertsWidget, ControlFinancialStatsOverview, CreditCardLimitAlertsWidget, InvoicesTableWidget, RecurringTransactionsNextMonthWidget, RecurringTransactionsTableWidget, TotalTransactionsExpenseByCategoriesTableWidget, TransactionsChartBarYearWidget, TransactionsChartWidget};
 use App\Livewire\CategoryExpenseAnalysisTable;
 use App\Livewire\InvoicesNextMontTableWidget;
 use Filament\Forms\Components\DatePicker;
@@ -52,6 +52,9 @@ class Dashboard extends BaseDashboard
     {
         return [
             ControlFinancialStatsOverview::class,
+            CategoryBudgetAlertsWidget::class,
+            CreditCardLimitAlertsWidget::class,
+            RecurringTransactionsNextMonthWidget::class,
             RecurringTransactionsTableWidget::class,
             InvoicesTableWidget::class,
             InvoicesNextMontTableWidget::class,
