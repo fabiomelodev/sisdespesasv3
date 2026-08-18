@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\TransactionGroups;
 
 use App\Filament\Resources\TransactionGroups\Pages\CreateTransactionGroup;
-use App\Filament\Resources\TransactionGroups\Pages\EditTransactionGroup;
 use App\Filament\Resources\TransactionGroups\Pages\ListTransactionGroups;
 use App\Filament\Resources\TransactionGroups\Pages\ViewTransactionGroup;
 use App\Filament\Resources\TransactionGroups\RelationManagers\TransactionsRelationManager;
 use App\Filament\Resources\TransactionGroups\Schemas\TransactionGroupForm;
+use App\Filament\Resources\TransactionGroups\Schemas\TransactionGroupInfolist;
 use App\Filament\Resources\TransactionGroups\Tables\TransactionGroupsTable;
 use App\Models\TransactionGroup;
 use BackedEnum;
@@ -36,6 +36,11 @@ class TransactionGroupResource extends Resource
         return TransactionGroupForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return TransactionGroupInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return TransactionGroupsTable::configure($table);
@@ -53,8 +58,7 @@ class TransactionGroupResource extends Resource
         return [
             'index' => ListTransactionGroups::route('/'),
             'create' => CreateTransactionGroup::route('/create'),
-            'view' => ViewTransactionGroup::route('/{record}')
-            // 'edit' => EditTransactionGroup::route('/{record}/edit'),
+            'view' => ViewTransactionGroup::route('/{record}'),
         ];
     }
 }

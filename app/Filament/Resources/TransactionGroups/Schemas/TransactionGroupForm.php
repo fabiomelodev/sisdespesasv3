@@ -9,6 +9,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -55,7 +56,7 @@ class TransactionGroupForm
                                     ]),
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
-                                    ->relationship('account', 'name')
+                                    ->relationship('account', 'name', fn(Builder $query): Builder => $query->where('status', true))
                                     ->required(),
                                 Select::make('category_id')
                                     ->label('Categoria')
@@ -63,7 +64,8 @@ class TransactionGroupForm
                                     ->required(),
                                 Select::make('credit_card_id')
                                     ->label('Cartão de Crédito')
-                                    ->relationship('creditCard', 'name')
+                                    ->relationship('creditCard', 'name', fn(Builder $query): Builder => $query->where('is_active', true))
+                                    ->visible(fn(Get $get): bool => $get('payment_method') === 'credit')
                             ]),
                         Section::make()
                             ->hidden(fn(?Model $record) => $record === null)

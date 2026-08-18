@@ -21,13 +21,19 @@ class TransactionGroup extends Model
         parent::boot();
 
         static::created(function ($model) {
-            $transactionAmount = $model->total_amount / $model->installments;
+            $installments = (int) $model->installments;
+            $baseAmount = round($model->total_amount / $installments, 2);
+            $allocatedAmount = 0;
 
-            for ($i = 1; $i <= $model->installments; $i++) {
+            for ($i = 1; $i <= $installments; $i++) {
+                $isLastInstallment = $i === $installments;
+                $amount = $isLastInstallment ? round($model->total_amount - $allocatedAmount, 2) : $baseAmount;
+                $allocatedAmount += $amount;
+
                 Transaction::create([
                     'name' => $model->name . ' ' . $i . '/' . $model->installments,
                     'type' => 'expense',
-                    'amount' => $transactionAmount,
+                    'amount' => $amount,
                     'payment_method' => $model->payment_method,
                     'installment_number' => $i,
                     'transaction_date' => $model->purchase_date->copy()->addMonthsNoOverflow($i - 1),
