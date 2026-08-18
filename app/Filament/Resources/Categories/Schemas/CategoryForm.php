@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\Categories\Schemas;
 
-use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,21 +30,21 @@ class CategoryForm
                     ->schema([
                         Section::make()
                             ->schema([
-                                TextInput::make('limit')
-                                    ->label('Limite')
-                                    ->prefix('R$')
-                                    ->required(),
                                 Select::make('type')
                                     ->label('Tipo')
+                                    ->live()
                                     ->options([
                                         'expense' => 'Despesa',
                                         'income' => 'Renda',
                                     ])
-                                    ->default('checking')
+                                    ->default('expense')
                                     ->required(),
-                                ColorPicker::make('color')
-                                    ->label('Cor')
-                                    ->required(),
+                                TextInput::make('limit')
+                                    ->label('Orçamento Mensal')
+                                    ->prefix('R$')
+                                    ->numeric()
+                                    ->visible(fn(Get $get): bool => $get('type') === 'expense')
+                                    ->required(fn(Get $get): bool => $get('type') === 'expense'),
                             ]),
                         Section::make()
                             ->hidden(fn(?Model $record) => $record === null)

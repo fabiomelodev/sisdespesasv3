@@ -30,6 +30,7 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
 
         // 2. Construção da Query
         $query = Category::query()
+            ->isExpense()
             ->orderBy('name', 'asc')
             ->select('categories.*')
             ->selectSub(function ($query) use ($startDate, $endDate) {
@@ -84,28 +85,39 @@ class TotalTransactionsExpenseByCategoriesTableWidget extends TableWidget
                 ProgressBarColumn::make('percentage')
                     ->state(function ($record) {
                         if ($record->limit <= 0)
-                            return 0;
+                            return 100;
 
-                        return ($record->totalExpenses * 100) / $record->limit;
+                        $spentPercentage = ($record->totalExpenses * 100) / $record->limit;
+
+                        return max(0, 100 - $spentPercentage);
                     })
                     ->maxValue(100)
-                    ->dangerColor('#22c55e')
-                    ->warningColor('#f59e0b')
-                    ->successColor('#ef4444')
+                    ->lowThreshold(20)
                     ->dangerLabel(function (Model $record): string {
-                        $totalExpenses = FormatCurrency::getFormatCurrency($record->totalExpenses);
+                        if ($record->limit <= 0) {
+                            return 'Sem orçamento definido';
+                        }
 
+                        $totalExpenses = FormatCurrency::getFormatCurrency($record->totalExpenses);
                         $limit = FormatCurrency::getFormatCurrency($record->limit);
 
-                        return "Controlado! {$totalExpenses} / {$limit}";
+                        return "Orçamento estourado! {$totalExpenses} / {$limit}";
                     })
-                    ->warningLabel('')
-                    ->successLabel(function (Model $record): string {
+                    ->warningLabel(function (Model $record): string {
                         $totalExpenses = FormatCurrency::getFormatCurrency($record->totalExpenses);
-
                         $limit = FormatCurrency::getFormatCurrency($record->limit);
 
-                        return "Cuidado! {$totalExpenses} / {$limit}";
+                        return "Atenção! {$totalExpenses} / {$limit}";
+                    })
+                    ->successLabel(function (Model $record): string {
+                        if ($record->limit <= 0) {
+                            return 'Sem orçamento definido';
+                        }
+
+                        $totalExpenses = FormatCurrency::getFormatCurrency($record->totalExpenses);
+                        $limit = FormatCurrency::getFormatCurrency($record->limit);
+
+                        return "{$totalExpenses} / {$limit}";
                     }),
             ])
             ->contentGrid([

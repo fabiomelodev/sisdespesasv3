@@ -17,7 +17,6 @@ class CategorySeeder extends Seeder
             [
                 'name' => 'Alimento',
                 'type' => 'expense',
-                'color' => '#000000',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -25,7 +24,6 @@ class CategorySeeder extends Seeder
             [
                 'name' => 'Mercado',
                 'type' => 'expense',
-                'color' => '#000000',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -33,7 +31,6 @@ class CategorySeeder extends Seeder
             [
                 'name' => 'Salário',
                 'type' => 'income',
-                'color' => '#000000',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
