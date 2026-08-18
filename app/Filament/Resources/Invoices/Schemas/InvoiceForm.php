@@ -10,6 +10,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class InvoiceForm
@@ -24,7 +25,7 @@ class InvoiceForm
                     ->schema([
                         Select::make('credit_card_id')
                             ->label('Cartão de Crédito')
-                            ->relationship('creditCard', 'name')
+                            ->relationship('creditCard', 'name', fn(Builder $query): Builder => $query->where('is_active', true))
                             ->required(),
                     ]),
                 Group::make()

@@ -71,46 +71,83 @@ class Invoice extends Model
                     return null;
                 }
 
-                return $this->due_date
+                $closingDate = $this->due_date
                     ->copy()
                     ->setDay((int) $this->creditCard->closing_day);
+
+                if ($closingDate->greaterThan($this->due_date)) {
+                    $closingDate->subMonthNoOverflow();
+                }
+
+                return $closingDate;
             }
         );
     }
 
-    public static function hasInvoiceByTransaction(Transaction $transaction): bool
+    /**
+     * Data de fechamento do ciclo de fatura ao qual a transação pertence.
+     *
+     * O ciclo é determinado pelo dia de fechamento do cartão, não pelo mês
+     * civil da transação: compras até (e incluindo) o dia de fechamento
+     * pertencem ao ciclo que fecha nesse mês; compras depois do fechamento
+     * pertencem ao ciclo que fecha no mês seguinte.
+     */
+    public static function closingDateForTransaction(Carbon $transactionDate, CreditCard $creditCard): Carbon
     {
-        return $transaction->creditCard()->first()->invoices()->where(function (Builder $query) use ($transaction) {
-            $query->whereMonth('reference_month', $transaction->transaction_date)->whereYear('reference_month', $transaction->transaction_date);
-        })->exists();
+        $closingDay = (int) $creditCard->closing_day;
+
+        $closingThisCycle = $transactionDate->copy()->day(min($closingDay, $transactionDate->daysInMonth));
+
+        if ($transactionDate->lessThanOrEqualTo($closingThisCycle)) {
+            return $closingThisCycle;
+        }
+
+        $nextMonth = $transactionDate->copy()->addMonthNoOverflow();
+
+        return $nextMonth->day(min($closingDay, $nextMonth->daysInMonth));
     }
 
-    public static function createInvoiceByTransaction(Transaction $transaction): Invoice
+    /**
+     * Data de vencimento correspondente a uma data de fechamento de ciclo.
+     */
+    public static function dueDateForClosing(Carbon $closingDate, CreditCard $creditCard): Carbon
     {
-        $nextMonth = $transaction->transaction_date
-            ->copy()
-            ->addMonthNoOverflow();
+        $dueDay = (int) $creditCard->due_day;
 
-        $dueDate = $nextMonth->setDay((int) $transaction->creditCard->due_day);
+        $dueDate = $closingDate->copy()->day(min($dueDay, $closingDate->daysInMonth));
 
-        return Invoice::create([
-            'reference_month' => $transaction->transaction_date,
-            'due_date' => $dueDate,
-            'is_closed' => 0,
-            'is_paid' => 0,
-            'credit_card_id' => $transaction->creditCard()->first()->id
-        ]);
+        if ($dueDate->lessThan($closingDate)) {
+            $dueDate = $dueDate->addMonthNoOverflow();
+            $dueDate = $dueDate->day(min($dueDay, $dueDate->daysInMonth));
+        }
+
+        return $dueDate;
     }
 
     public static function invoiceByTransaction(Transaction $transaction): Invoice
     {
-        if (static::hasInvoiceByTransaction($transaction)) {
-            return $transaction->creditCard()->first()->invoices()->where(function (Builder $query) use ($transaction) {
-                $query->whereMonth('reference_month', $transaction->transaction_date)->whereYear('reference_month', $transaction->transaction_date);
-            })->first();
+        $creditCard = $transaction->creditCard()->first();
+
+        $closingDate = static::closingDateForTransaction($transaction->transaction_date, $creditCard);
+
+        $invoice = $creditCard->invoices()
+            ->whereMonth('reference_month', $closingDate->month)
+            ->whereYear('reference_month', $closingDate->year)
+            ->first();
+
+        if ($invoice) {
+            return $invoice;
         }
 
-        return static::createInvoiceByTransaction($transaction);
+        $dueDate = static::dueDateForClosing($closingDate, $creditCard);
+
+        return Invoice::create([
+            'reference_month' => $closingDate,
+            'due_date' => $dueDate,
+            'is_closed' => 0,
+            'is_paid' => 0,
+            'credit_card_id' => $creditCard->id,
+        ]);
     }
 
     public function creditCard(): BelongsTo
