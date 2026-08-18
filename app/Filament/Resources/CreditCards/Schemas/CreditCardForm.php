@@ -11,6 +11,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class CreditCardForm
@@ -50,7 +51,7 @@ class CreditCardForm
                                     ->required(),
                                 Select::make('account_id')
                                     ->label('Conta Bancária')
-                                    ->relationship('account', 'name')
+                                    ->relationship('account', 'name', fn(Builder $query): Builder => $query->where('status', true))
                                     ->required(),
                                 Toggle::make('is_active')
                                     ->label('Ativo')
