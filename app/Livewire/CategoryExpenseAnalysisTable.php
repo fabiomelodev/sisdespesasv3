@@ -51,7 +51,7 @@ class CategoryExpenseAnalysisTable extends TableWidget
         return $table
             ->query(fn(): Builder => $query)
             ->heading('Análise de Despesas por Categoria')
-            ->defaultSort('gasto_atual', 'desc')
+            ->defaultSort('name', 'asc')
             ->columns([
                 TextColumn::make('name')
                     ->label('Categoria')
