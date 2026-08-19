@@ -90,6 +90,13 @@ class TransactionsTable
                 SelectFilter::make('category_id')
                     ->label('Categoria')
                     ->relationship('category', 'name'),
+                SelectFilter::make('payment_method')
+                    ->label('Meio de Pagamento')
+                    ->options([
+                        'debit' => 'Débito',
+                        'credit' => 'Crédito',
+                        'pix' => 'Pix',
+                    ]),
                 SelectFilter::make('is_paid')
                     ->label('Pago')
                     ->options([
