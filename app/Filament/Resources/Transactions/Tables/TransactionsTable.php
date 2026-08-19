@@ -92,6 +92,7 @@ class TransactionsTable
                     ->relationship('category', 'name'),
                 SelectFilter::make('payment_method')
                     ->label('Meio de Pagamento')
+                    ->multiple()
                     ->options([
                         'debit' => 'Débito',
                         'credit' => 'Crédito',
