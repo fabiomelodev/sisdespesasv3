@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Transactions\Tables;
 
+use App\Filament\Imports\NubankDebitImporter;
 use App\Helpers\FormatCurrency;
 use App\Models\Transaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ImportAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -22,6 +24,11 @@ class TransactionsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ImportAction::make()
+                    ->label('Importar Débito NuBank')
+                    ->importer(NubankDebitImporter::class),
+            ])
             ->defaultSort('transaction_date', 'desc')
             ->paginated(false)
             ->columns([
