@@ -2,13 +2,9 @@
 
 namespace App\Filament\Resources\Invoices\RelationManagers;
 
-use App\Filament\Imports\TransactionImporter;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Helpers\FormatCurrency;
-use Filament\Actions\CreateAction;
-use Filament\Actions\ImportAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -20,15 +16,6 @@ class TransactionsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->headerActions([
-                ImportAction::make()
-                    ->icon(Heroicon::ArrowUp)
-                    ->label('Importar')
-                    ->importer(TransactionImporter::class)
-                    ->options([
-                        'ownerRecord' => $this->getOwnerRecord()
-                    ])
-            ])
             ->heading('Transações')
             ->defaultSort('transaction_date', 'desc')
             ->paginated(false)
