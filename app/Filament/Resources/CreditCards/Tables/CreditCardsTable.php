@@ -8,10 +8,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class CreditCardsTable
 {
@@ -69,16 +71,41 @@ class CreditCardsTable
                         true => 'Ativo',
                         false => 'Inativo',
                     ]),
+                SelectFilter::make('account_id')
+                    ->label('Conta Bancária')
+                    ->relationship('account', 'name'),
             ])
             ->recordActions([
                 EditAction::make()
                     ->iconButton(),
                 DeleteAction::make()
-                    ->iconButton(),
+                    ->iconButton()
+                    ->before(function (CreditCard $record, DeleteAction $action) {
+                        if ($record->hasHistory()) {
+                            Notification::make()
+                                ->title('Não é possível excluir')
+                                ->body('Este cartão possui faturas ou transações vinculadas.')
+                                ->danger()
+                                ->send();
+
+                            $action->halt();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->before(function (Collection $records, DeleteBulkAction $action) {
+                            if ($records->contains(fn(CreditCard $record): bool => $record->hasHistory())) {
+                                Notification::make()
+                                    ->title('Não é possível excluir')
+                                    ->body('Um ou mais cartões selecionados possuem faturas ou transações vinculadas.')
+                                    ->danger()
+                                    ->send();
+
+                                $action->halt();
+                            }
+                        }),
                 ]),
             ]);
     }

@@ -22,4 +22,14 @@ class CreditCard extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function hasHistory(): bool
+    {
+        return $this->invoices()->exists() || $this->transactions()->exists();
+    }
 }

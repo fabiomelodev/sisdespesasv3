@@ -28,18 +28,21 @@ class CreditCardForm
                         TextInput::make('name')
                             ->label('Nome')
                             ->columnSpanFull()
-                            ->required(),
+                            ->required()
+                            ->unique(ignoreRecord: true),
                         Select::make('opening_day')
                             ->label('Abertura')
                             ->options(DateHelper::getDays())
                             ->columnSpan(1)
                             ->required()
+                            ->different('closing_day')
                             ->helperText('Dia que começa a contar as transações do ciclo.'),
                         Select::make('closing_day')
                             ->label('Fechamento')
                             ->options(DateHelper::getDays())
                             ->columnSpan(1)
                             ->required()
+                            ->different('opening_day')
                             ->helperText('Dia que encerra a contagem do ciclo.'),
                         Select::make('due_day')
                             ->label('Vencimento')

@@ -22,7 +22,7 @@ class CreditCardResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
 
-    protected static ?string $recordTitleAttribute = 'CreditCard';
+    protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $label = 'Cartão de Crédito';
 
