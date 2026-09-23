@@ -85,26 +85,56 @@ class Invoice extends Model
     }
 
     /**
+     * Data de abertura do ciclo que fecha em $closingDate.
+     *
+     * Se o dia de abertura for depois do dia de fechamento (ex: abre dia 08,
+     * fecha dia 07), o ciclo cruza a virada do mês e a abertura fica no mês
+     * anterior ao fechamento. Caso contrário, abertura e fechamento ficam no
+     * mesmo mês.
+     */
+    protected static function openingDateForClosing(Carbon $closingDate, CreditCard $creditCard): Carbon
+    {
+        $openingDay = (int) $creditCard->opening_day;
+        $closingDay = (int) $creditCard->closing_day;
+
+        $openingDate = $closingDate->copy();
+
+        if ($openingDay > $closingDay) {
+            $openingDate = $openingDate->subMonthNoOverflow();
+        }
+
+        return $openingDate->day(min($openingDay, $openingDate->daysInMonth));
+    }
+
+    /**
      * Data de fechamento do ciclo de fatura ao qual a transação pertence.
      *
-     * O ciclo é determinado pelo dia de fechamento do cartão, não pelo mês
-     * civil da transação: compras até (e incluindo) o dia de fechamento
-     * pertencem ao ciclo que fecha nesse mês; compras depois do fechamento
-     * pertencem ao ciclo que fecha no mês seguinte.
+     * O ciclo é determinado pelos dias de abertura e fechamento do cartão,
+     * não pelo mês civil da transação: compras entre a abertura e o
+     * fechamento (inclusive) pertencem a esse ciclo; compras depois do
+     * fechamento pertencem ao próximo ciclo; compras antes da abertura
+     * pertencem ao ciclo anterior.
      */
     public static function closingDateForTransaction(Carbon $transactionDate, CreditCard $creditCard): Carbon
     {
         $closingDay = (int) $creditCard->closing_day;
 
         $closingThisCycle = $transactionDate->copy()->day(min($closingDay, $transactionDate->daysInMonth));
+        $openingThisCycle = static::openingDateForClosing($closingThisCycle, $creditCard);
 
-        if ($transactionDate->lessThanOrEqualTo($closingThisCycle)) {
+        if ($transactionDate->between($openingThisCycle, $closingThisCycle)) {
             return $closingThisCycle;
         }
 
-        $nextMonth = $transactionDate->copy()->addMonthNoOverflow();
+        if ($transactionDate->greaterThan($closingThisCycle)) {
+            $nextMonth = $transactionDate->copy()->addMonthNoOverflow();
 
-        return $nextMonth->day(min($closingDay, $nextMonth->daysInMonth));
+            return $nextMonth->day(min($closingDay, $nextMonth->daysInMonth));
+        }
+
+        $previousMonth = $transactionDate->copy()->subMonthNoOverflow();
+
+        return $previousMonth->day(min($closingDay, $previousMonth->daysInMonth));
     }
 
     /**

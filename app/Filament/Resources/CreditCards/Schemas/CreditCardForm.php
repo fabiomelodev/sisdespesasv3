@@ -23,17 +23,24 @@ class CreditCardForm
             ->components([
                 Section::make()
                     ->columnSpan(9)
-                    ->columns(2)
+                    ->columns(3)
                     ->schema([
                         TextInput::make('name')
                             ->label('Nome')
                             ->columnSpanFull()
                             ->required(),
+                        Select::make('opening_day')
+                            ->label('Abertura')
+                            ->options(DateHelper::getDays())
+                            ->columnSpan(1)
+                            ->required()
+                            ->helperText('Dia que começa a contar as transações do ciclo.'),
                         Select::make('closing_day')
                             ->label('Fechamento')
                             ->options(DateHelper::getDays())
                             ->columnSpan(1)
-                            ->required(),
+                            ->required()
+                            ->helperText('Dia que encerra a contagem do ciclo.'),
                         Select::make('due_day')
                             ->label('Vencimento')
                             ->options(DateHelper::getDays())

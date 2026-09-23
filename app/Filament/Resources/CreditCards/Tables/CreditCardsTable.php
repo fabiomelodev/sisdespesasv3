@@ -51,6 +51,8 @@ class CreditCardsTable
                             default => 'success',
                         };
                     }),
+                TextColumn::make('opening_day')
+                    ->label('Abertura'),
                 TextColumn::make('closing_day')
                     ->label('Fechamento'),
                 TextColumn::make('due_day')
