@@ -16,9 +16,11 @@ class LinkedTransactionsTable
         return $table
             ->columns([
                 TextColumn::make('origin')
-                    ->label('Origem'),
+                    ->label('Origem')
+                    ->searchable(),
                 TextColumn::make('alternative')
-                    ->label('Alternativa'),
+                    ->label('Alternativa')
+                    ->searchable(),
                 TextColumn::make('category.name')
                     ->label('Categoria'),
             ])

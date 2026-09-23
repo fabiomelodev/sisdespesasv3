@@ -20,10 +20,13 @@ class LinkedTransactionForm
                     ->schema([
                         TextInput::make('origin')
                             ->label('Origem')
-                            ->required(),
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->helperText('Texto exatamente como aparece na fatura importada (ex: "Dl*Uberrides").'),
                         TextInput::make('alternative')
                             ->label('Alternativa')
-                            ->required(),
+                            ->required()
+                            ->helperText('Nome amigável que substituirá a origem ao importar (ex: "Uber").'),
                     ]),
                 Section::make()
                     ->columnSpan(3)
@@ -31,7 +34,8 @@ class LinkedTransactionForm
                         Select::make('category_id')
                             ->label('Categoria')
                             ->relationship('category', 'name')
-                            ->required(),
+                            ->required()
+                            ->helperText('Categoria aplicada automaticamente às transações importadas com essa origem.'),
                     ]),
             ]);
     }

@@ -21,11 +21,11 @@ class LinkedTransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsUpDown;
 
-    protected static ?string $recordTitleAttribute = 'LinkedTransaction';
+    protected static ?string $recordTitleAttribute = 'origin';
 
-    protected static ?string $label = 'Transação Vinculada';
+    protected static ?string $label = 'Regra de Importação';
 
-    protected static ?string $pluralLabel = 'Transações Vinculadas';
+    protected static ?string $pluralLabel = 'Regras de Importação';
 
     protected static string|UnitEnum|null $navigationGroup = 'Transações';
 
