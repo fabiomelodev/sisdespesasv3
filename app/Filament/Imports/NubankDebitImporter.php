@@ -30,7 +30,11 @@ class NubankDebitImporter extends Importer
                 ->label('Valor')
                 ->requiredMapping()
                 ->rules(['required', 'numeric'])
-                ->castStateUsing(fn(?string $state) => is_numeric($state) ? abs((float) $state) : null),
+                ->castStateUsing(fn(?string $state) => is_numeric($state) ? (float) $state : null)
+                // Mantém o sinal para decidir despesa/renda em resolveRecord();
+                // o valor final salvo é sempre abs(). Preenchido manualmente
+                // para não ser sobrescrito por fillRecord() com o valor com sinal.
+                ->fillRecordUsing(fn() => null),
             ImportColumn::make('nu_id')
                 ->label('Identificador')
                 ->requiredMapping()
@@ -54,30 +58,47 @@ class NubankDebitImporter extends Importer
         }
 
         $description = trim($this->data['description']);
-
-        if (!str_starts_with(mb_strtolower($description), 'compra no débito')) {
-            throw new RowImportFailedException('Ignorado: não é uma compra no débito.');
-        }
-
-        $merchant = trim(Str::after($description, '-'));
-
-        $linkedTransaction = LinkedTransaction::query()
-            ->where('origin', $merchant)
-            ->first();
-
-        $category = $linkedTransaction?->category ?? Category::query()->where('name', 'Compra')->first();
+        $signedAmount = $this->data['amount'];
+        $type = $signedAmount < 0 ? Transaction::EXPENSE : Transaction::INCOME;
 
         $account = Account::query()->where('name', 'NuBank')->first();
 
+        if (str_starts_with(mb_strtolower($description), 'compra no débito')) {
+            $merchant = trim(Str::after($description, '-'));
+
+            $linkedTransaction = LinkedTransaction::query()
+                ->where('origin', $merchant)
+                ->first();
+
+            $category = $linkedTransaction?->category ?? Category::query()->where('name', 'Compra')->first();
+
+            return Transaction::create([
+                'name' => $linkedTransaction?->alternative ?? $merchant,
+                'type' => Transaction::EXPENSE,
+                'amount' => abs($signedAmount),
+                'payment_method' => 'debit',
+                'transaction_date' => $this->data['transaction_date'],
+                'is_paid' => true,
+                'account_id' => $account?->id,
+                'category_id' => $category?->id,
+                'nu_id' => $identifier,
+            ]);
+        }
+
+        // Qualquer outra linha do extrato (resgates, transferências, pagamentos
+        // de fatura/boleto etc.) entra numa categoria "Verificado" para revisão
+        // manual, em vez de ser descartada.
+        $category = Category::firstOrCreate(['name' => 'Verificado', 'type' => $type]);
+
         return Transaction::create([
-            'name' => $linkedTransaction?->alternative ?? $merchant,
-            'type' => Transaction::EXPENSE,
-            'amount' => $this->data['amount'],
+            'name' => $description,
+            'type' => $type,
+            'amount' => abs($signedAmount),
             'payment_method' => 'debit',
             'transaction_date' => $this->data['transaction_date'],
             'is_paid' => true,
             'account_id' => $account?->id,
-            'category_id' => $category?->id,
+            'category_id' => $category->id,
             'nu_id' => $identifier,
         ]);
     }
