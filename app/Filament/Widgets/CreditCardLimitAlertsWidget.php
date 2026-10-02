@@ -17,10 +17,7 @@ class CreditCardLimitAlertsWidget extends Widget
             ->where('is_active', true)
             ->get()
             ->map(function (CreditCard $creditCard): array {
-                $used = (float) $creditCard->invoices()
-                    ->where('invoices.is_paid', false)
-                    ->join('transactions', 'transactions.invoice_id', '=', 'invoices.id')
-                    ->sum('transactions.amount');
+                $used = $creditCard->usedLimit();
 
                 $percentage = $creditCard->limit > 0
                     ? ($used * 100) / $creditCard->limit

@@ -33,12 +33,7 @@ class CreditCardsTable
                     ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
                 TextColumn::make('used_limit')
                     ->label('Limite Utilizado')
-                    ->getStateUsing(function (CreditCard $record): float {
-                        return (float) $record->invoices()
-                            ->where('invoices.is_paid', false)
-                            ->join('transactions', 'transactions.invoice_id', '=', 'invoices.id')
-                            ->sum('transactions.amount');
-                    })
+                    ->getStateUsing(fn(CreditCard $record): float => $record->usedLimit())
                     ->formatStateUsing(fn(float $state): string => FormatCurrency::getFormatCurrency($state))
                     ->color(function (float $state, CreditCard $record): string {
                         if ($record->limit <= 0) {
