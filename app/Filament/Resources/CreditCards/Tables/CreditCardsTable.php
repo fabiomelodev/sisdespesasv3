@@ -54,9 +54,13 @@ class CreditCardsTable
                         };
                     }),
                 TextColumn::make('opening_day')
-                    ->label('Abertura'),
+                    ->label('Abertura')
+                    ->formatStateUsing(fn(?string $state, CreditCard $record): string => $record->closing_offset_days !== null ? '—' : $state),
                 TextColumn::make('closing_day')
-                    ->label('Fechamento'),
+                    ->label('Fechamento')
+                    ->formatStateUsing(fn(?string $state, CreditCard $record): string => $record->closing_offset_days !== null
+                        ? $record->closing_offset_days . ' dias antes'
+                        : $state),
                 TextColumn::make('due_day')
                     ->label('Vencimento'),
                 ToggleColumn::make('is_active')

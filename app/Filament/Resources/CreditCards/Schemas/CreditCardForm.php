@@ -7,6 +7,7 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -30,20 +31,47 @@ class CreditCardForm
                             ->columnSpanFull()
                             ->required()
                             ->unique(ignoreRecord: true),
+                        Toggle::make('dynamic_closing')
+                            ->label('Fechamento dinâmico')
+                            ->live()
+                            ->dehydrated(false)
+                            ->default(false)
+                            ->afterStateHydrated(fn(Toggle $component, ?Model $record) => $component->state($record?->closing_offset_days !== null))
+                            ->columnSpanFull()
+                            ->helperText('Para cartões cujo fechamento varia com o tamanho do mês (ex: fecha sempre N dias corridos antes do vencimento) em vez de um dia fixo do mês.'),
                         Select::make('opening_day')
                             ->label('Abertura')
                             ->options(DateHelper::getDays())
                             ->columnSpan(1)
-                            ->required()
-                            ->different('closing_day')
+                            ->default('01')
+                            ->visible(fn(Get $get): bool => !$get('dynamic_closing'))
+                            ->required(fn(Get $get): bool => !$get('dynamic_closing'))
+                            ->rules(fn(Get $get): array => $get('dynamic_closing') ? [] : ['different:closing_day'])
+                            ->dehydrateStateUsing(fn(Get $get, ?string $state) => $get('dynamic_closing') ? null : $state)
+                            ->dehydratedWhenHidden()
                             ->helperText('Dia que começa a contar as transações do ciclo.'),
                         Select::make('closing_day')
                             ->label('Fechamento')
                             ->options(DateHelper::getDays())
                             ->columnSpan(1)
-                            ->required()
-                            ->different('opening_day')
+                            ->default('01')
+                            ->visible(fn(Get $get): bool => !$get('dynamic_closing'))
+                            ->required(fn(Get $get): bool => !$get('dynamic_closing'))
+                            ->rules(fn(Get $get): array => $get('dynamic_closing') ? [] : ['different:opening_day'])
+                            ->dehydrateStateUsing(fn(Get $get, ?string $state) => $get('dynamic_closing') ? null : $state)
+                            ->dehydratedWhenHidden()
                             ->helperText('Dia que encerra a contagem do ciclo.'),
+                        TextInput::make('closing_offset_days')
+                            ->label('Fecha (dias antes do vencimento)')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(30)
+                            ->columnSpan(1)
+                            ->visible(fn(Get $get): bool => (bool) $get('dynamic_closing'))
+                            ->required(fn(Get $get): bool => (bool) $get('dynamic_closing'))
+                            ->dehydrateStateUsing(fn(Get $get, $state) => $get('dynamic_closing') ? $state : null)
+                            ->dehydratedWhenHidden()
+                            ->helperText('Ex: 7 = fecha 7 dias corridos antes do vencimento.'),
                         Select::make('due_day')
                             ->label('Vencimento')
                             ->options(DateHelper::getDays())
