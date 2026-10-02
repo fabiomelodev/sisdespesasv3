@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Tables;
 
+use App\Filament\Imports\NubankCreditImporter;
 use App\Filament\Imports\NubankDebitImporter;
 use App\Helpers\FormatCurrency;
 use App\Models\Transaction;
@@ -25,9 +26,12 @@ class TransactionsTable
     {
         return $table
             ->headerActions([
-                ImportAction::make()
+                ImportAction::make('importarDebitoNubank')
                     ->label('Importar Débito NuBank')
                     ->importer(NubankDebitImporter::class),
+                ImportAction::make('importarCreditoNubank')
+                    ->label('Importar Crédito NuBank')
+                    ->importer(NubankCreditImporter::class),
             ])
             ->defaultSort('transaction_date', 'desc')
             ->paginated(false)
